@@ -1,3 +1,7 @@
+security:
+  storage:
+    type: mysql
+
 database:
   default:
     link:  "mysql:test:SeaMpyZXXhSpBpa7@tcp(172.18.28.240:3306)/test"

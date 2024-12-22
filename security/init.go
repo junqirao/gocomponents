@@ -8,6 +8,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
+	"sync"
 
 	"github.com/gogf/gf/v2/frame/g"
 )
@@ -16,6 +17,10 @@ const (
 	defaultKeypairBits = 2048
 	StorageTypeLocal   = "local"
 	StorageTypeMysql   = "mysql"
+)
+
+var (
+	onceLoad = sync.Once{}
 )
 
 type (
@@ -40,6 +45,13 @@ func Init(ctx context.Context, s ...Storage) (err error) {
 		storage = s[0]
 	}
 
+	onceLoad.Do(func() {
+		err = load(ctx, storage)
+	})
+	return
+}
+
+func load(ctx context.Context, storage Storage) (err error) {
 	if err = storage.LoadPrivateKey(ctx); err != nil {
 		return
 	}

@@ -4,15 +4,37 @@ import (
 	"context"
 
 	_ "github.com/gogf/gf/contrib/drivers/mysql/v2"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 
+	"github.com/junqirao/gocomponents/security"
 	"github.com/junqirao/gocomponents/types"
 	"github.com/junqirao/gocomponents/user/controller"
 	"github.com/junqirao/gocomponents/user/logic"
 )
 
+const (
+	tableName      = "c_user"
+	createTableDDL = `
+create table if not exists c_user
+(
+    id            varchar(50)            not null primary key,
+    username      varchar(20)            not null,
+    password      varchar(200)           not null,
+    created_at    datetime               null,
+    updated_at    datetime               null,
+    administrator tinyint(1)  default 0  null,
+    source        varchar(20) default '' null,
+    status        tinyint     default 0  null,
+    extra         json                   null,
+    unique index c_user_uk_username (username)
+);
+`
+)
+
 type (
 	Plugin struct {
+		db          string
 		ctx         context.Context
 		prefix      string
 		middlewares []ghttp.HandlerFunc
@@ -42,6 +64,13 @@ var (
 			p.middlewares = middlewares
 		}
 	}
+
+	// PluginOptionWithDBGroupName sets the database group name
+	PluginOptionWithDBGroupName = func(db string) PluginOption {
+		return func(p *Plugin) {
+			p.db = db
+		}
+	}
 )
 
 func NewPlugin(opt ...PluginOption) ghttp.Plugin {
@@ -60,13 +89,35 @@ func NewPlugin(opt ...PluginOption) ghttp.Plugin {
 	return p
 }
 
-func (p *Plugin) Install(s *ghttp.Server) error {
+func (p *Plugin) Install(s *ghttp.Server) (err error) {
+	// make sure security module has been initialized
+	if err = security.Init(p.ctx); err != nil {
+		return
+	}
+	if err = p.createTableIfNotExists(p.ctx); err != nil {
+		return
+	}
 	s.Group(p.prefix, func(group *ghttp.RouterGroup) {
 		group.Middleware(p.middlewares...)
 
 		group.POST("/create", controller.CreateUser)
-		group.GET("/exist-username", controller.CheckUsernameExists)
+		group.POST("/exist-username", controller.CheckUsernameExists)
+		group.GET("/public-key", controller.GetPublicKeyPem)
 	})
 
 	return logic.CreateAdminIfNotExists(p.ctx)
+}
+
+func (p *Plugin) createTableIfNotExists(ctx context.Context) (err error) {
+	tables, err := g.DB().Ctx(ctx).Tables(ctx)
+	if err != nil {
+		return
+	}
+	for _, table := range tables {
+		if table == tableName {
+			return
+		}
+	}
+	_, err = g.DB(p.db).Ctx(ctx).Exec(ctx, createTableDDL)
+	return
 }
