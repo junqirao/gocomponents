@@ -7,7 +7,6 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 
-	"github.com/junqirao/gocomponents/security"
 	"github.com/junqirao/gocomponents/types"
 	"github.com/junqirao/gocomponents/user/controller"
 	"github.com/junqirao/gocomponents/user/logic"
@@ -90,10 +89,6 @@ func NewPlugin(opt ...PluginOption) ghttp.Plugin {
 }
 
 func (p *Plugin) Install(s *ghttp.Server) (err error) {
-	// make sure security module has been initialized
-	if err = security.Init(p.ctx); err != nil {
-		return
-	}
 	if err = p.createTableIfNotExists(p.ctx); err != nil {
 		return
 	}
