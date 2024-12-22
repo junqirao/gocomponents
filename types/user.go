@@ -48,3 +48,8 @@ type User struct {
 	Status        UserStatus     `json:"status"`
 	Extra         map[string]any `json:"extra"`
 }
+
+type UserInfoWithToken struct {
+	User
+	AccessToken string `json:"access_token"`
+}

@@ -80,7 +80,7 @@ func NewPlugin(opt ...PluginOption) ghttp.Plugin {
 		accept(p)
 	}
 	if p.prefix == "" {
-		p.prefix = "/user"
+		p.prefix = "/"
 	}
 	if p.ctx == nil {
 		p.ctx = context.Background()
@@ -95,9 +95,18 @@ func (p *Plugin) Install(s *ghttp.Server) (err error) {
 	s.Group(p.prefix, func(group *ghttp.RouterGroup) {
 		group.Middleware(p.middlewares...)
 
-		group.POST("/create", controller.CreateUser)
-		group.POST("/exist-username", controller.CheckUsernameExists)
-		group.GET("/public-key", controller.GetPublicKeyPem)
+		group.Group("/user", func(group *ghttp.RouterGroup) {
+			// no need login
+			group.POST("/register", controller.CreateUser)
+			group.POST("/exist-username", controller.CheckUsernameExists)
+			group.POST("/login", controller.Login)
+
+		})
+
+		group.Group("/security", func(group *ghttp.RouterGroup) {
+			group.GET("/transport/public-key", controller.GetPublicKeyPem)
+		})
+
 	})
 
 	return logic.CreateAdminIfNotExists(p.ctx)
