@@ -2,6 +2,7 @@ package security
 
 import (
 	"context"
+	"crypto/rsa"
 	"database/sql"
 	"errors"
 
@@ -21,9 +22,8 @@ const (
     name    varchar(20) null,
     content mediumtext  null
 );`
-	storageObjectNamePrivateKey = "private_key"
-	storageObjectNamePublicKey  = "public_key"
-	storageObjectTypeRsa        = "rsa"
+	storageObjectTypePrivateKey = "private_key"
+	storageObjectTypePublicKey  = "public_key"
 )
 
 type (
@@ -66,13 +66,13 @@ func (m *mysqlStorage) createTableIfNotExists(ctx context.Context) (err error) {
 	return
 }
 
-func (m *mysqlStorage) StorePublicKey(ctx context.Context, data []byte) (err error) {
-	return m.upsert(ctx, data, storageObjectNamePublicKey, storageObjectTypeRsa)
+func (m *mysqlStorage) StorePublicKey(ctx context.Context, name string, data []byte) (err error) {
+	return m.upsert(ctx, data, name, storageObjectTypePublicKey)
 
 }
 
-func (m *mysqlStorage) StorePrivateKey(ctx context.Context, data []byte) (err error) {
-	return m.upsert(ctx, data, storageObjectNamePrivateKey, storageObjectTypeRsa)
+func (m *mysqlStorage) StorePrivateKey(ctx context.Context, name string, data []byte) (err error) {
+	return m.upsert(ctx, data, name, storageObjectTypePrivateKey)
 }
 
 func (m *mysqlStorage) upsert(ctx context.Context, data []byte, name, typ string) (err error) {
@@ -95,8 +95,8 @@ func (m *mysqlStorage) upsert(ctx context.Context, data []byte, name, typ string
 	return
 }
 
-func (m *mysqlStorage) LoadPublicKey(ctx context.Context) (err error) {
-	o, err := m.load(ctx, storageObjectNamePublicKey, storageObjectTypeRsa)
+func (m *mysqlStorage) LoadPublicKey(ctx context.Context, name string) (publicKey *rsa.PublicKey, err error) {
+	o, err := m.load(ctx, name, storageObjectTypePublicKey)
 	if err == nil && len(o.Content) > 0 {
 		var content []byte
 		if content, err = gbase64.DecodeString(o.Content); err != nil {
@@ -107,8 +107,8 @@ func (m *mysqlStorage) LoadPublicKey(ctx context.Context) (err error) {
 	return
 }
 
-func (m *mysqlStorage) LoadPrivateKey(ctx context.Context) (err error) {
-	o, err := m.load(ctx, storageObjectNamePrivateKey, storageObjectTypeRsa)
+func (m *mysqlStorage) LoadPrivateKey(ctx context.Context, name string) (privateKey *rsa.PrivateKey, err error) {
+	o, err := m.load(ctx, name, storageObjectTypePrivateKey)
 	if err == nil && len(o.Content) > 0 {
 		var content []byte
 		if content, err = gbase64.DecodeString(o.Content); err != nil {

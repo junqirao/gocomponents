@@ -1,12 +1,13 @@
 security:
   storage:
-    type: mysql
     local:
+      # directory path of private key and public key, e.g. "somewhere/" or "somewhere"
       private_key:
       public_key:
     database:
+      # goframe mysql database config group name
       group:
 
 database:
   default:
-    link:  "mysql:test:SeaMpyZXXhSpBpa7@tcp(172.18.28.240:3306)/test"
+    link: "mysql:test:SeaMpyZXXhSpBpa7@tcp(172.18.28.240:3306)/test"

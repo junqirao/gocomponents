@@ -1,16 +1,12 @@
 package security
 
 import (
-	"bytes"
 	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
-	"errors"
 	"sync"
-
-	"github.com/gogf/gf/v2/frame/g"
 )
 
 const (
@@ -20,76 +16,19 @@ const (
 )
 
 var (
-	onceLoad = sync.Once{}
+	instances = sync.Map{} // name : *Provider
 )
 
 type (
 	Storage interface {
-		StorePublicKey(ctx context.Context, data []byte) error
-		StorePrivateKey(ctx context.Context, data []byte) error
-		LoadPublicKey(ctx context.Context) error
-		LoadPrivateKey(ctx context.Context) error
+		StorePublicKey(ctx context.Context, name string, data []byte) error
+		StorePrivateKey(ctx context.Context, name string, data []byte) error
+		LoadPublicKey(ctx context.Context, name string) (publicKey *rsa.PublicKey, err error)
+		LoadPrivateKey(ctx context.Context, name string) (privateKey *rsa.PrivateKey, err error)
 	}
 )
 
-// Init security module from local file or other storage like database
-//
-// try get keypair from Storage it will auto create if not exist both.
-// *notice* make sure every node has the same keypair or maybe cannot
-// decode the encrypted data properly cause of keypair mismatch.
-func Init(ctx context.Context, s ...Storage) (err error) {
-	var storage Storage
-	if len(s) == 0 {
-		storage = getStorage(ctx)
-	} else {
-		storage = s[0]
-	}
-
-	onceLoad.Do(func() {
-		err = load(ctx, storage)
-	})
-	return
-}
-
-func load(ctx context.Context, storage Storage) (err error) {
-	if err = storage.LoadPrivateKey(ctx); err != nil {
-		return
-	}
-	if err = storage.LoadPublicKey(ctx); err != nil {
-		return
-	}
-
-	if privateKey == nil && publicKey == nil {
-		// auto create
-		bits := defaultKeypairBits
-		if v, err := g.Cfg().Get(ctx, "security.keypair_bits", defaultKeypairBits); err == nil && v.Int() > 0 {
-			bits = v.Int()
-		}
-
-		privateKey, publicKey, err = generateKeypair(bits)
-		if err == nil {
-			g.Log().Infof(ctx, "security module keypair generated bits: %d", bits)
-			err = marshalAndStoreCurrentKeypair(ctx, storage)
-		}
-		return
-	} else if privateKey != nil && publicKey != nil {
-		return
-	}
-
-	return errors.New("incomplete keypair")
-}
-
-func getStorage(ctx context.Context) Storage {
-	typ := StorageTypeLocal
-	v, err := g.Cfg().Get(ctx, "security.storage.type")
-	if err == nil {
-		if s := v.String(); s != "" {
-			typ = s
-		}
-	}
-
-	g.Log().Infof(ctx, "security module storage loaded type: %s", typ)
-
+func getStorageByType(ctx context.Context, typ string) Storage {
 	switch typ {
 	case StorageTypeMysql:
 		return NewMysqlStorage(ctx)
@@ -98,34 +37,28 @@ func getStorage(ctx context.Context) Storage {
 	}
 }
 
-func marshalAndStoreCurrentKeypair(ctx context.Context, storage Storage) (err error) {
-	privateKeyBytes, err := x509.MarshalPKCS8PrivateKey(privateKey)
-	if err != nil {
-		return
-	}
-	bb := &bytes.Buffer{}
-	if err = pem.Encode(bb, &pem.Block{
-		Type:  "PRIVATE KEY",
-		Bytes: privateKeyBytes,
-	}); err != nil {
-		return
-	}
-	if err = storage.StorePrivateKey(ctx, bb.Bytes()); err != nil {
+// GetProvider of security module, if not exists create with specified
+// type (using storage type "mysql" as default).
+//
+// try get keypair from Storage it will auto create if not exist both.
+// *notice* make sure every node has the same keypair or maybe cannot
+// decode the encrypted data properly cause of keypair mismatch.
+func GetProvider(ctx context.Context, name string, typ ...string) (p *Provider, err error) {
+	value, ok := instances.Load(name)
+	if ok {
+		p = value.(*Provider)
 		return
 	}
 
-	publicKeyBytes, err := x509.MarshalPKIXPublicKey(publicKey)
-	if err != nil {
+	st := StorageTypeMysql
+	if len(typ) > 0 {
+		st = typ[0]
+	}
+	if p, err = NewProvider(ctx, name, st); err != nil {
 		return
 	}
-	bb = &bytes.Buffer{}
-	if err = pem.Encode(bb, &pem.Block{
-		Type:  "PUBLIC KEY",
-		Bytes: publicKeyBytes,
-	}); err != nil {
-		return
-	}
-	err = storage.StorePublicKey(ctx, bb.Bytes())
+
+	instances.Store(name, p)
 	return
 }
 

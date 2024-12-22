@@ -1,70 +1,43 @@
 package security
 
 import (
-	"bytes"
 	"context"
-	"crypto/x509"
-	"encoding/pem"
-	"fmt"
 	"testing"
 )
 
-func TestLoadFromLocal(t *testing.T) {
-	err := Init(context.Background())
-	if err != nil {
-		t.Fatal(err)
-		return
-	}
-
-	printKey := func(typeName string, bs []byte) {
-		bb := &bytes.Buffer{}
-		_ = pem.Encode(bb, &pem.Block{
-			Type:  typeName,
-			Bytes: bs,
-		})
-
-		fmt.Println(bb.String())
-	}
-
-	pri, _ := x509.MarshalPKCS8PrivateKey(privateKey)
-	printKey("PRIVATE KEY", pri)
-	fmt.Println()
-	fmt.Println()
-	pub, _ := x509.MarshalPKIXPublicKey(publicKey)
-	printKey("PUBLIC KEY", pub)
-}
-
 func TestEncryptDecrypt(t *testing.T) {
-	err := Init(context.Background())
+	var ps []*Provider
+
+	p1, err := GetProvider(context.Background(), "test_mysql", StorageTypeMysql)
 	if err != nil {
 		t.Fatal(err)
 		return
 	}
+	ps = append(ps, p1)
+	p2, err := GetProvider(context.Background(), "test_local", StorageTypeLocal)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	ps = append(ps, p2)
 
 	data := "hello world"
-	encrypted, err := Encrypt(data)
-	if err != nil {
-		t.Fatal(err)
-		return
-	}
+	for _, p := range ps {
+		t.Log(p.GetPublicKeyPem())
+		encrypted, err := p.Encrypt(data)
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
 
-	decrypted, err := Decrypt(encrypted)
-	if err != nil {
-		t.Fatal(err)
-		return
-	}
+		decrypted, err := p.Decrypt(encrypted)
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
 
-	if decrypted != data {
-		t.Fatal("data not match")
+		if decrypted != data {
+			t.Fatal("data not match")
+		}
 	}
-}
-
-func TestGetPublicKeyPem(t *testing.T) {
-	err := Init(context.Background())
-	if err != nil {
-		t.Fatal(err)
-		return
-	}
-
-	fmt.Println(GetPublicKeyPem())
 }
