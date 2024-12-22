@@ -7,6 +7,7 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
+	"errors"
 
 	"github.com/gogf/gf/v2/util/gconv"
 )
@@ -18,6 +19,9 @@ var (
 
 // Encrypt using rsa
 func Encrypt(data interface{}) (s string, err error) {
+	if publicKey == nil {
+		return "", errors.New("public key not found")
+	}
 	bs, err := rsa.EncryptPKCS1v15(rand.Reader, publicKey, []byte(gconv.String(data)))
 	if err != nil {
 		return
@@ -29,6 +33,9 @@ func Encrypt(data interface{}) (s string, err error) {
 
 // Decrypt using rsa
 func Decrypt(data interface{}) (s string, err error) {
+	if privateKey == nil {
+		return "", errors.New("private key not found")
+	}
 	raw, err := base64.StdEncoding.DecodeString(gconv.String(data))
 	if err != nil {
 		return

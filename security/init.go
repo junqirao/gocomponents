@@ -27,12 +27,12 @@ type (
 	}
 )
 
-// Load security module from local file or other storage like database
+// Init security module from local file or other storage like database
 //
 // try get keypair from Storage it will auto create if not exist both.
 // *notice* make sure every node has the same keypair or maybe cannot
 // decode the encrypted data properly cause of keypair mismatch.
-func Load(ctx context.Context, s ...Storage) (err error) {
+func Init(ctx context.Context, s ...Storage) (err error) {
 	var storage Storage
 	if len(s) == 0 {
 		storage = getStorage(ctx)

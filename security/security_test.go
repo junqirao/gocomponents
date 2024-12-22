@@ -10,7 +10,7 @@ import (
 )
 
 func TestLoadFromLocal(t *testing.T) {
-	err := Load(context.Background())
+	err := Init(context.Background())
 	if err != nil {
 		t.Fatal(err)
 		return
@@ -35,7 +35,7 @@ func TestLoadFromLocal(t *testing.T) {
 }
 
 func TestEncryptDecrypt(t *testing.T) {
-	err := Load(context.Background())
+	err := Init(context.Background())
 	if err != nil {
 		t.Fatal(err)
 		return
@@ -60,7 +60,7 @@ func TestEncryptDecrypt(t *testing.T) {
 }
 
 func TestGetPublicKeyPem(t *testing.T) {
-	err := Load(context.Background())
+	err := Init(context.Background())
 	if err != nil {
 		t.Fatal(err)
 		return
