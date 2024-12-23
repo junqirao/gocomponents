@@ -22,7 +22,13 @@ import (
 	"github.com/junqirao/gocomponents/user/model/entity"
 )
 
-func UserExists(ctx context.Context, username string) (err error) {
+var (
+	User = &user{}
+)
+
+type user struct{}
+
+func (l *user) Exists(ctx context.Context, username string) (err error) {
 	cnt, err := dao.CUser.Ctx(ctx).Count(g.Map{
 		dao.CUser.Columns().Username: username,
 	})
@@ -36,8 +42,8 @@ func UserExists(ctx context.Context, username string) (err error) {
 	return
 }
 
-func CreateUser(ctx context.Context, input *model.CreateUserReq) (user *types.User, err error) {
-	if err = UserExists(ctx, input.Username); err != nil {
+func (l *user) Create(ctx context.Context, input *model.CreateUserReq) (user *types.User, err error) {
+	if err = l.Exists(ctx, input.Username); err != nil {
 		return
 	}
 
@@ -72,7 +78,7 @@ func CreateUser(ctx context.Context, input *model.CreateUserReq) (user *types.Us
 	return
 }
 
-func UserLogin(ctx context.Context, input *model.UserLoginReq) (user *types.UserInfoWithToken, err error) {
+func (l *user) Login(ctx context.Context, input *model.UserLoginReq) (user *types.UserInfoWithToken, err error) {
 	u := new(entity.CUser)
 	eu, err := dao.CUser.Ctx(ctx).Where(dao.CUser.Columns().Username, input.Username).One()
 	if err != nil {
@@ -135,7 +141,7 @@ func UserLogin(ctx context.Context, input *model.UserLoginReq) (user *types.User
 	return
 }
 
-func CreateAdminIfNotExists(ctx context.Context) (err error) {
+func (l *user) CreateAdminIfNotExists(ctx context.Context) (err error) {
 	count, err := dao.CUser.Ctx(ctx).Count(g.Map{
 		dao.CUser.Columns().Administrator: 1,
 	})
@@ -148,7 +154,7 @@ func CreateAdminIfNotExists(ctx context.Context) (err error) {
 	pwd := grand.S(16)
 	username := "admin"
 
-	if err := UserExists(ctx, username); err != nil {
+	if err := l.Exists(ctx, username); err != nil {
 		username = fmt.Sprintf("admin_%v", grand.S(5))
 	}
 

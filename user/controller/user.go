@@ -8,32 +8,37 @@ import (
 	"github.com/junqirao/gocomponents/user/model"
 )
 
-// CreateUser creates a new user
-func CreateUser(r *ghttp.Request) {
+var User = &user{}
+
+type user struct {
+}
+
+// Create creates a new user
+func (user) Create(r *ghttp.Request) {
 	params := new(model.CreateUserReq)
 	if err := r.Parse(params); err != nil {
 		response.Error(r, response.CodeInvalidParameter.WithDetail(err.Error()))
 		return
 	}
 
-	user, err := logic.CreateUser(r.Context(), params)
+	u, err := logic.User.Create(r.Context(), params)
 	if err != nil {
 		response.Error(r, err)
 		return
 	}
 
-	response.Success(r, user)
+	response.Success(r, u)
 }
 
 // CheckUsernameExists checks whether the username exists
-func CheckUsernameExists(r *ghttp.Request) {
+func (user) CheckUsernameExists(r *ghttp.Request) {
 	params := new(model.CheckUsernameReq)
 	if err := r.Parse(params); err != nil {
 		response.Error(r, response.CodeInvalidParameter.WithDetail(err.Error()))
 		return
 	}
 
-	err := logic.UserExists(r.Context(), params.Username)
+	err := logic.User.Exists(r.Context(), params.Username)
 	if err != nil {
 		response.Error(r, err)
 		return

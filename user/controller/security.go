@@ -8,8 +8,13 @@ import (
 	"github.com/junqirao/gocomponents/user/logic"
 )
 
-func GetPublicKeyPem(r *ghttp.Request) {
-	pem, err := logic.GetSecurityPublicKeyPem(r.Context())
+var Security = &security{}
+
+type security struct {
+}
+
+func (security) GetTransportPublicKeyPem(r *ghttp.Request) {
+	pem, err := logic.Security.GetTransportPublicKeyPem(r.Context())
 	if err != nil {
 		response.Error(r, err)
 		return

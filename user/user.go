@@ -97,19 +97,19 @@ func (p *Plugin) Install(s *ghttp.Server) (err error) {
 
 		group.Group("/user", func(group *ghttp.RouterGroup) {
 			// no need login
-			group.POST("/register", controller.CreateUser)
-			group.POST("/exist-username", controller.CheckUsernameExists)
-			group.POST("/login", controller.Login)
+			group.POST("/register", controller.User.Create)
+			group.POST("/exist-username", controller.User.CheckUsernameExists)
+			group.POST("/login", controller.User.Login)
 
 		})
 
 		group.Group("/security", func(group *ghttp.RouterGroup) {
-			group.GET("/transport/public-key", controller.GetPublicKeyPem)
+			group.GET("/transport/public-key", controller.Security.GetTransportPublicKeyPem)
 		})
 
 	})
 
-	return logic.CreateAdminIfNotExists(p.ctx)
+	return logic.User.CreateAdminIfNotExists(p.ctx)
 }
 
 func (p *Plugin) createTableIfNotExists(ctx context.Context) (err error) {
