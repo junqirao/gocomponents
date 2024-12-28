@@ -7,8 +7,8 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/util/gconv"
 
-	"github.com/junqirao/gocomponents/auth"
 	"github.com/junqirao/gocomponents/jwt"
+	"github.com/junqirao/gocomponents/trace"
 )
 
 const (
@@ -28,6 +28,7 @@ type (
 		RemoteAddr    string `json:"remote_addr"`
 		WebServerName string `json:"web_server_name"`
 		EnterTime     int64  `json:"enter_time"`
+		TraceId       string `json:"trace_id"`
 	}
 
 	Server struct {
@@ -52,13 +53,12 @@ func (s Server) clone() *Server {
 	}
 }
 
-func Collect(r *ghttp.Request) {
+func Middleware(r *ghttp.Request) {
 	meta := &Meta{
 		User: &User{
 			UserId:   r.GetHeader(jwt.HeaderKeyUserId),
 			UserName: r.GetHeader(jwt.HeaderKeyUserName),
 			UserFrom: r.GetHeader(jwt.HeaderKeyUserFrom),
-			AppId:    r.GetHeader(auth.HeaderKeyAppId),
 		},
 		Request: &Request{
 			Method:        r.Method,
@@ -66,18 +66,12 @@ func Collect(r *ghttp.Request) {
 			RemoteAddr:    r.GetRemoteIp(),
 			WebServerName: r.Server.GetName(),
 			EnterTime:     r.EnterTime.UnixMilli(),
+			TraceId:       trace.GetTraceId(r.Context()),
 		},
 		Server: server.clone(),
 	}
 	r.SetCtxVar(ctxKeyMeta, meta)
 	r.Middleware.Next()
-}
-
-func CtxWithServerInfo(parent context.Context) context.Context {
-	meta := &Meta{
-		Server: server.clone(),
-	}
-	return context.WithValue(parent, ctxKeyMeta, meta)
 }
 
 func FromCtx(ctx context.Context) *Meta {
@@ -87,31 +81,19 @@ func FromCtx(ctx context.Context) *Meta {
 	return meta
 }
 
-func ServerInfo() *Server {
-	if server == nil {
-		return new(Server)
-	}
-	return server.clone()
+func ServerInfo() Server {
+	return *server.clone()
 }
 
 func ServerName() string {
-	if server == nil {
-		Init()
-	}
 	return server.ServerName
 }
 
 func HostName() string {
-	if server == nil {
-		Init()
-	}
 	return server.HostName
 }
 
 func InstanceId() string {
-	if server == nil {
-		Init()
-	}
 	return server.InstanceId
 }
 

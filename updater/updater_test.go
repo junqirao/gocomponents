@@ -14,7 +14,6 @@ import (
 	"github.com/gogf/gf/v2/util/gconv"
 
 	"github.com/junqirao/gocomponents/dkv"
-	"github.com/junqirao/gocomponents/meta"
 )
 
 type (
@@ -82,7 +81,6 @@ registry:
 	}
 
 	ctx := context.Background()
-	meta.Init("test_server")
 	content, err := gcfg.NewAdapterContent(cfg)
 	if err != nil {
 		t.Fatal(err)
@@ -147,7 +145,6 @@ registry:
   username:
   password:
 `
-	meta.Init("test_server")
 	fis := make([]*FuncInfo, 0)
 	for i := 0; i < 10; i++ {
 		fis = append(fis, NewFunc(fmt.Sprintf("test_%v", i), func(ctx context.Context) (err error) {
@@ -251,7 +248,6 @@ registry:
 	}, NewFuncConfig().Retry()))
 
 	ctx := context.Background()
-	meta.Init("test_server")
 	content, err := gcfg.NewAdapterContent(cfg)
 	if err != nil {
 		t.Fatal(err)
@@ -307,7 +303,6 @@ registry:
 	}, NewFuncConfig().Must().Retry()))
 
 	ctx := context.Background()
-	meta.Init("test_server")
 	content, err := gcfg.NewAdapterContent(cfg)
 	if err != nil {
 		t.Fatal(err)
@@ -349,7 +344,6 @@ registry:
 	fis = append(fis, f)
 
 	ctx := context.Background()
-	meta.Init("test_server")
 	content, err := gcfg.NewAdapterContent(cfg)
 	if err != nil {
 		t.Fatal(err)

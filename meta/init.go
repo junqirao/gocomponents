@@ -7,36 +7,23 @@ import (
 	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
-
-	"github.com/junqirao/gocomponents/uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 var (
-	startedAt   time.Time
-	server      *Server
-	ipv4        = getIpv4()
-	initialized = false
+	startedAt time.Time
+	server    *Server
+	ipv4      = getIpv4()
 )
 
-func Init(serverName ...string) {
-	if initialized {
-		return
-	}
-	name := ""
-	if len(serverName) > 0 {
-		name = serverName[0]
-	}
-	if name == "" {
-		name = tryGetCfgString(context.Background(), "meta.server_name", "undefined_server")
-	}
+func init() {
 	hostName, _ := os.Hostname()
 	startedAt = time.Now()
 	server = &Server{
-		ServerName: name,
+		ServerName: tryGetCfgString(context.Background(), "meta.server_name", "undefined_server"),
 		HostName:   hostName,
-		InstanceId: tryGetCfgString(context.Background(), "meta.uuid", uuid.Generate()),
+		InstanceId: tryGetCfgString(context.Background(), "meta.uuid", uuid.NewV4().String()),
 	}
-	initialized = true
 }
 
 func tryGetCfgString(ctx context.Context, pattern string, def string) string {
