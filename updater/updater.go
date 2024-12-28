@@ -9,7 +9,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
 
-	"github.com/junqirao/gocomponents/dkv"
+	"github.com/junqirao/gocomponents/kvdb"
 	"github.com/junqirao/gocomponents/meta"
 )
 
@@ -187,9 +187,9 @@ func Update2Latest(ctx context.Context, adaptor RecordAdaptor, functions ...*Fun
 	return
 }
 
-func ConcurrencyUpdate2Latest(ctx context.Context, adaptor RecordAdaptor, d dkv.Database, functions ...*FuncInfo) (err error) {
+func ConcurrencyUpdate2Latest(ctx context.Context, adaptor RecordAdaptor, d kvdb.Database, functions ...*FuncInfo) (err error) {
 	// lock
-	mu, err := dkv.NewMutex(ctx, d, fmt.Sprintf("updater_exec_%s", meta.ServerName()))
+	mu, err := kvdb.NewMutex(ctx, d, fmt.Sprintf("updater_exec_%s", meta.ServerName()))
 	if err != nil {
 		return
 	}

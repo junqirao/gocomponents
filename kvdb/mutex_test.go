@@ -1,4 +1,4 @@
-package dkv
+package kvdb
 
 import (
 	"context"

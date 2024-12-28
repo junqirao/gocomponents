@@ -13,7 +13,7 @@ import (
 	"github.com/gogf/gf/v2/os/gcfg"
 	"github.com/gogf/gf/v2/util/gconv"
 
-	"github.com/junqirao/gocomponents/dkv"
+	"github.com/junqirao/gocomponents/kvdb"
 )
 
 type (
@@ -88,11 +88,7 @@ registry:
 	}
 	g.Cfg().SetAdapter(content)
 
-	database, err := dkv.NewDB(ctx)
-	if err != nil {
-		t.Fatal(err)
-		return
-	}
+	database := kvdb.Raw
 
 	wg := sync.WaitGroup{}
 	wg.Add(3)
@@ -183,11 +179,7 @@ registry:
 		return
 	}
 	g.Cfg().SetAdapter(content)
-	database, err := dkv.NewDB(ctx)
-	if err != nil {
-		t.Fatal(err)
-		return
-	}
+	database := kvdb.Raw
 	adaptor := NewKVDatabaseAdaptor(database)
 	wg := sync.WaitGroup{}
 	wg.Add(3)
@@ -254,11 +246,7 @@ registry:
 		return
 	}
 	g.Cfg().SetAdapter(content)
-	database, err := dkv.NewDB(ctx)
-	if err != nil {
-		t.Fatal(err)
-		return
-	}
+	database := kvdb.Raw
 	adaptor := NewKVDatabaseAdaptor(database)
 	t.Log("try update")
 	err = Update2Latest(ctx, adaptor, fis...)
@@ -309,11 +297,7 @@ registry:
 		return
 	}
 	g.Cfg().SetAdapter(content)
-	database, err := dkv.NewDB(ctx)
-	if err != nil {
-		t.Fatal(err)
-		return
-	}
+	database := kvdb.Raw
 	adaptor := NewKVDatabaseAdaptor(database)
 	t.Log("try update")
 	err = Update2Latest(ctx, adaptor, fis...)
@@ -350,11 +334,7 @@ registry:
 		return
 	}
 	g.Cfg().SetAdapter(content)
-	database, err := dkv.NewDB(ctx)
-	if err != nil {
-		t.Fatal(err)
-		return
-	}
+	database := kvdb.Raw
 	adaptor := NewKVDatabaseAdaptor(database)
 	t.Log("try update")
 	err = Update2Latest(ctx, adaptor, fis...)

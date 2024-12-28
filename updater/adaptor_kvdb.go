@@ -6,7 +6,7 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 
-	"github.com/junqirao/gocomponents/dkv"
+	"github.com/junqirao/gocomponents/kvdb"
 )
 
 var (
@@ -14,15 +14,15 @@ var (
 )
 
 type KVDatabaseAdaptor struct {
-	db dkv.Database // updater_record/{name}_{type}: Record
+	db kvdb.Database // updater_record/{name}_{type}: Record
 }
 
-func NewKVDatabaseAdaptor(db dkv.Database) (a RecordAdaptor) {
+func NewKVDatabaseAdaptor(db kvdb.Database) (a RecordAdaptor) {
 	return &KVDatabaseAdaptor{db: db}
 }
 
 func (k KVDatabaseAdaptor) Store(ctx context.Context, record *Record) (err error) {
-	return k.db.Set(ctx, k.getKey(record), record)
+	return k.db.Set(ctx, k.getKey(record), record, 0)
 }
 
 func (k KVDatabaseAdaptor) Load(ctx context.Context, params *RecordQueryParams) (res *RecordQueryResult, err error) {
