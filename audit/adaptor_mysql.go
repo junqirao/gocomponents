@@ -9,10 +9,11 @@ import (
 	"github.com/gogf/gf/v2/os/glog"
 	"github.com/gogf/gf/v2/util/gconv"
 
-	"git.lumosc.com/lumosc/core/audit/dao"
-	"git.lumosc.com/lumosc/core/audit/embed"
 	// db driver
 	_ "github.com/gogf/gf/contrib/drivers/mysql/v2"
+
+	"github.com/junqirao/gocomponents/audit/dao"
+	"github.com/junqirao/gocomponents/audit/embed"
 )
 
 type auditDao = *dao.AuditDao

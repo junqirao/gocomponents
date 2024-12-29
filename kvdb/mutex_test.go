@@ -9,14 +9,7 @@ import (
 
 func TestMutex(t *testing.T) {
 	ctx := context.Background()
-	db, err := newEtcd(ctx, Config{
-		Endpoints: []string{"172.18.28.10:2379", "172.18.28.10:2380", "172.18.28.10:2381"},
-	})
-	if err != nil {
-		t.Fatal(err)
-		return
-	}
-	mutex, err := NewMutex(ctx, db, "test")
+	mutex, err := NewMutex(ctx, "test")
 	if err != nil {
 		t.Fatal(err)
 		return

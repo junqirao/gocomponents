@@ -1,4 +1,4 @@
-package simple_registry
+package registry
 
 import (
 	"context"
@@ -57,8 +57,22 @@ type (
 // if *Instance is provided will be register automatically.
 // if context is done, watch loop will stop and local cache
 // won't be updated anymore.
-func Init(ctx context.Context, config Config, ins ...*Instance) (err error) {
+func Init(ctx context.Context, ins ...*Instance) (err error) {
 	onceLoad.Do(func() {
+		var (
+			v        *g.Var
+			config   = Config{}
+			instance *Instance
+		)
+
+		v, err = g.Cfg().Get(ctx, "registry")
+		if err != nil {
+			return
+		}
+		if err = v.Struct(&config); err != nil {
+			return
+		}
+
 		config.check()
 
 		// create registry instance
@@ -67,8 +81,12 @@ func Init(ctx context.Context, config Config, ins ...*Instance) (err error) {
 		}
 		// collect instance info and register
 		if len(ins) > 0 && ins[0] != nil {
-			err = Registry.register(ctx, ins[0].fillInfo().clone())
+			instance = ins[0]
+		} else {
+			instance = config.Instance
 		}
+
+		err = Registry.register(ctx, instance.fillInfo().clone())
 	})
 	return
 }

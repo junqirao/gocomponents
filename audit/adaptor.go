@@ -7,7 +7,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
 
-	"git.lumosc.com/lumosc/core/response"
+	"github.com/junqirao/gocomponents/response"
 )
 
 type RecordQueryParams struct {

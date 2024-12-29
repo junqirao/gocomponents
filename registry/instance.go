@@ -1,4 +1,4 @@
-package simple_registry
+package registry
 
 import (
 	"encoding/json"

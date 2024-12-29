@@ -5,7 +5,7 @@ import (
 	"io"
 	"time"
 
-	"git.lumosc.com/lumosc/core/meta"
+	"github.com/junqirao/gocomponents/meta"
 )
 
 type ILogger interface {

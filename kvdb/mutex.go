@@ -11,8 +11,13 @@ type Mutex struct {
 	sync.Locker
 }
 
-func NewMutex(ctx context.Context, database Database, name string) (mu Mutex, err error) {
-	locker, err := database.Locker(ctx, fmt.Sprintf("lock_%s", name))
+func NewMutex(ctx context.Context, name string, database ...Database) (mu Mutex, err error) {
+	var db = Raw
+	if len(database) > 0 {
+		db = database[0]
+	}
+
+	locker, err := db.Locker(ctx, fmt.Sprintf("lock_%s", name))
 	if err != nil {
 		return
 	}

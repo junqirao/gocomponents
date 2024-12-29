@@ -1,7 +1,12 @@
-package simple_registry
+package registry
 
 import (
+	"context"
 	"fmt"
+	"strings"
+
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/util/gconv"
 )
 
 const (
@@ -14,8 +19,9 @@ const (
 type (
 	// Config for registry
 	Config struct {
-		Prefix            string `json:"prefix"`
-		HeartBeatInterval int64  `json:"heart_beat_interval"` // default 3s
+		Instance          *Instance `json:"instance"`
+		Prefix            string    `json:"prefix"`
+		HeartBeatInterval int64     `json:"heart_beat_interval"` // default 3s
 	}
 )
 
@@ -25,6 +31,17 @@ func (c *Config) check() {
 	}
 	if c.HeartBeatInterval == 0 {
 		c.HeartBeatInterval = defaultHeartBeatInterval
+	}
+	if c.Instance.Port == 0 {
+		// try to get server.address
+		v, err := g.Cfg().Get(context.Background(), "server.address")
+		if err == nil {
+			parts := strings.Split(v.String(), ":")
+			if len(parts) == 0 {
+				return
+			}
+			c.Instance.Port = gconv.Int(parts[len(parts)-1])
+		}
 	}
 }
 

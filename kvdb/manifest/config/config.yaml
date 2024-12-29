@@ -5,10 +5,3 @@ kvdb:
     - kv.isz.lumosc.com:2381
   username:
   password:
-
-registry:
-  instance:
-    service_name: "test-service"
-    meta:
-      key1: "value1"
-      key2: 2

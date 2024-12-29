@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
 
-	"github.com/junqirao/gocomponents/kvdb"
 	"github.com/junqirao/gocomponents/meta"
 )
 
@@ -187,12 +187,10 @@ func Update2Latest(ctx context.Context, adaptor RecordAdaptor, functions ...*Fun
 	return
 }
 
-func ConcurrencyUpdate2Latest(ctx context.Context, adaptor RecordAdaptor, d kvdb.Database, functions ...*FuncInfo) (err error) {
-	// lock
-	mu, err := kvdb.NewMutex(ctx, d, fmt.Sprintf("updater_exec_%s", meta.ServerName()))
-	if err != nil {
-		return
-	}
+// ConcurrencyUpdate2Latest use distributed lock to update latest.
+// see kvdb.NewMutex, if you use sync.Locker locally, it may cause
+// consistency problems in distributed environment.
+func ConcurrencyUpdate2Latest(ctx context.Context, adaptor RecordAdaptor, mu sync.Locker, functions ...*FuncInfo) (err error) {
 	mu.Lock()
 	defer mu.Unlock()
 	return Update2Latest(ctx, adaptor, functions...)

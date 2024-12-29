@@ -1,4 +1,4 @@
-## Simple Registry
+## Registry
 
 providing basic registry function
 

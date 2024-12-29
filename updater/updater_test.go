@@ -14,6 +14,7 @@ import (
 	"github.com/gogf/gf/v2/util/gconv"
 
 	"github.com/junqirao/gocomponents/kvdb"
+	"github.com/junqirao/gocomponents/meta"
 )
 
 type (
@@ -88,14 +89,18 @@ registry:
 	}
 	g.Cfg().SetAdapter(content)
 
-	database := kvdb.Raw
+	// lock
+	mu, err := kvdb.NewMutex(ctx, fmt.Sprintf("updater_exec_%s", meta.ServerName()))
+	if err != nil {
+		return
+	}
 
 	wg := sync.WaitGroup{}
 	wg.Add(3)
 
 	go func(tt *testing.T) {
 		tt.Log("try concurrence update 1")
-		err = ConcurrencyUpdate2Latest(ctx, adaptor, database, fis...)
+		err = ConcurrencyUpdate2Latest(ctx, adaptor, mu, fis...)
 		if err != nil {
 			wg.Done()
 			tt.Error(err)
@@ -106,7 +111,7 @@ registry:
 	}(t)
 	go func(tt *testing.T) {
 		tt.Log("try concurrence update 2")
-		err = ConcurrencyUpdate2Latest(ctx, adaptor, database, fis2...)
+		err = ConcurrencyUpdate2Latest(ctx, adaptor, mu, fis2...)
 		if err != nil {
 			wg.Done()
 			tt.Error(err)
@@ -117,7 +122,7 @@ registry:
 	}(t)
 	go func(tt *testing.T) {
 		tt.Log("try concurrence update 3")
-		err = ConcurrencyUpdate2Latest(ctx, adaptor, database, fis3...)
+		err = ConcurrencyUpdate2Latest(ctx, adaptor, mu, fis3...)
 		if err != nil {
 			wg.Done()
 			tt.Error(err)
@@ -179,6 +184,12 @@ registry:
 		return
 	}
 	g.Cfg().SetAdapter(content)
+	// lock
+	mu, err := kvdb.NewMutex(ctx, fmt.Sprintf("updater_exec_%s", meta.ServerName()))
+	if err != nil {
+		return
+	}
+
 	database := kvdb.Raw
 	adaptor := NewKVDatabaseAdaptor(database)
 	wg := sync.WaitGroup{}
@@ -186,7 +197,7 @@ registry:
 
 	go func(tt *testing.T) {
 		tt.Log("try concurrence update 1")
-		err = ConcurrencyUpdate2Latest(ctx, adaptor, database, fis...)
+		err = ConcurrencyUpdate2Latest(ctx, adaptor, mu, fis...)
 		if err != nil {
 			wg.Done()
 			tt.Error(err)
@@ -197,7 +208,7 @@ registry:
 	}(t)
 	go func(tt *testing.T) {
 		tt.Log("try concurrence update 2")
-		err = ConcurrencyUpdate2Latest(ctx, adaptor, database, fis2...)
+		err = ConcurrencyUpdate2Latest(ctx, adaptor, mu, fis2...)
 		if err != nil {
 			wg.Done()
 			tt.Error(err)
@@ -208,7 +219,7 @@ registry:
 	}(t)
 	go func(tt *testing.T) {
 		tt.Log("try concurrence update 3")
-		err = ConcurrencyUpdate2Latest(ctx, adaptor, database, fis3...)
+		err = ConcurrencyUpdate2Latest(ctx, adaptor, mu, fis3...)
 		if err != nil {
 			wg.Done()
 			tt.Error(err)

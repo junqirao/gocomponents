@@ -8,7 +8,7 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 
-	"git.lumosc.com/lumosc/core/grace"
+	"github.com/junqirao/gocomponents/grace"
 )
 
 var (

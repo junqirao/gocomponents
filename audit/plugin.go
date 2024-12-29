@@ -6,8 +6,8 @@ import (
 
 	"github.com/gogf/gf/v2/net/ghttp"
 
-	"git.lumosc.com/lumosc/core/gfutil"
-	"git.lumosc.com/lumosc/core/response"
+	"github.com/junqirao/gocomponents/gfutil"
+	"github.com/junqirao/gocomponents/response"
 )
 
 func Plugin(prefix string, middleware ...ghttp.HandlerFunc) ghttp.Plugin {
@@ -20,7 +20,7 @@ func Plugin(prefix string, middleware ...ghttp.HandlerFunc) ghttp.Plugin {
 		gfutil.WithName("audit-record-helper"),
 		gfutil.WithDescription("audit record helper"),
 		gfutil.WithVersion("v1.0.0"),
-		gfutil.WithAuthor("lumosc"),
+		gfutil.WithAuthor("junqirao"),
 		gfutil.WithInstallHandler(func(group *ghttp.RouterGroup) {
 			group.POST("/record", query)
 			group.GET("/supported-modules", supportedModules)

@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"sort"
+	"strings"
 	"sync"
 	"syscall"
 
@@ -26,7 +27,11 @@ func (h handlers) Len() int {
 }
 
 func (h handlers) Less(i, j int) bool {
-	return h[i].Priority < h[j].Priority
+	if h[i].Priority != h[j].Priority {
+		return h[i].Priority < h[j].Priority
+	}
+
+	return strings.Compare(h[i].Name, h[j].Name) == -1
 }
 
 func (h handlers) Swap(i, j int) {
