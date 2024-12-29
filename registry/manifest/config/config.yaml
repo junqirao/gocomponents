@@ -1,0 +1,7 @@
+kvdb:
+  endpoints:
+    - kv.isz.lumosc.com:2379
+    - kv.isz.lumosc.com:2380
+    - kv.isz.lumosc.com:2381
+  username:
+  password:

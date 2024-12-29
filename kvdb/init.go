@@ -10,13 +10,8 @@ func init() {
 		ctx    = gctx.GetInitCtx()
 		config = Config{}
 	)
-
-	v, err := g.Cfg().Get(ctx, "g.Cfg().Get()")
+	err := g.Cfg().MustGet(ctx, "kvdb").Struct(&config)
 	if err != nil {
-		g.Log().Errorf(ctx, "kvdb failed to get config: %v", err)
-		return
-	}
-	if err = v.Struct(&config); err != nil {
 		g.Log().Errorf(ctx, "kvdb failed to parse config: %v", err)
 		return
 	}
