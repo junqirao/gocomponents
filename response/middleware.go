@@ -18,8 +18,6 @@ func Middleware(r *ghttp.Request) {
 	)
 	if ec == nil {
 		ec = DefaultSuccess()
-	} else {
-		data = ec.Detail()
 	}
 
 	WriteData(r, ec, data)
