@@ -86,7 +86,7 @@ func NewFunc(name string, fn FN, cfg *FuncConfig, typ ...int) *FuncInfo {
 		t = typ[0]
 	}
 	return &FuncInfo{
-		Name:       fmt.Sprintf("%s/%s", meta.ServerName(), name),
+		Name:       fmt.Sprintf("%s/%s", meta.ServiceName(), name),
 		FN:         fn,
 		Type:       t,
 		FuncConfig: *cfg,

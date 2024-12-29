@@ -51,7 +51,7 @@ func launch(do func(ctx context.Context), cfg *config) {
 	execHooks(ctx, "init", cfg.init)
 
 	// meta init trigger
-	g.Log().Infof(ctx, "launcher start service: %s", meta.ServerName())
+	g.Log().Infof(ctx, "launcher start service: %s", meta.ServiceName())
 
 	// updater
 	if cfg.updater != nil {

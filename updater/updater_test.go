@@ -90,7 +90,7 @@ registry:
 	g.Cfg().SetAdapter(content)
 
 	// lock
-	mu, err := kvdb.NewMutex(ctx, fmt.Sprintf("updater_exec_%s", meta.ServerName()))
+	mu, err := kvdb.NewMutex(ctx, fmt.Sprintf("updater_exec_%s", meta.ServiceName()))
 	if err != nil {
 		return
 	}
@@ -185,7 +185,7 @@ registry:
 	}
 	g.Cfg().SetAdapter(content)
 	// lock
-	mu, err := kvdb.NewMutex(ctx, fmt.Sprintf("updater_exec_%s", meta.ServerName()))
+	mu, err := kvdb.NewMutex(ctx, fmt.Sprintf("updater_exec_%s", meta.ServiceName()))
 	if err != nil {
 		return
 	}

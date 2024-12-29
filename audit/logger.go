@@ -111,7 +111,7 @@ func (l *logger) save(record *Record) {
 	if record.Content != nil {
 		if content, ok := record.Content.(*RecordContent); ok && content != nil {
 			if content.Meta != nil && content.Meta.Server != nil {
-				record.From = content.Meta.Server.ServerName
+				record.From = content.Meta.Server.ServiceName
 			}
 		}
 	}

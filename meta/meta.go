@@ -32,9 +32,9 @@ type (
 	}
 
 	Server struct {
-		ServerName string `json:"server_name"`
-		HostName   string `json:"host_name"`
-		InstanceId string `json:"instance_id"`
+		ServiceName string `json:"service_name"`
+		HostName    string `json:"host_name"`
+		InstanceId  string `json:"instance_id"`
 	}
 
 	User struct {
@@ -47,9 +47,9 @@ type (
 
 func (s Server) clone() *Server {
 	return &Server{
-		ServerName: s.ServerName,
-		HostName:   s.HostName,
-		InstanceId: s.InstanceId,
+		ServiceName: s.ServiceName,
+		HostName:    s.HostName,
+		InstanceId:  s.InstanceId,
 	}
 }
 
@@ -85,8 +85,8 @@ func ServerInfo() Server {
 	return *server.clone()
 }
 
-func ServerName() string {
-	return server.ServerName
+func ServiceName() string {
+	return server.ServiceName
 }
 
 func HostName() string {

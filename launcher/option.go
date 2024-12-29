@@ -70,7 +70,7 @@ func WithConcurrencyUpdater(
 	functions ...*updater.FuncInfo) Option {
 	return func(cfg *config) {
 		cfg.updater = func(ctx context.Context) (err error) {
-			mu, err := kvdb.NewMutex(ctx, fmt.Sprintf("updater_exec_%s", meta.ServerName()))
+			mu, err := kvdb.NewMutex(ctx, fmt.Sprintf("updater_exec_%s", meta.ServiceName()))
 			if err != nil {
 				return
 			}

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gctx"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -17,12 +18,13 @@ var (
 )
 
 func init() {
+	ctx := gctx.GetInitCtx()
 	hostName, _ := os.Hostname()
 	startedAt = time.Now()
 	server = &Server{
-		ServerName: tryGetCfgString(context.Background(), "meta.server_name", "undefined_server"),
-		HostName:   hostName,
-		InstanceId: tryGetCfgString(context.Background(), "meta.uuid", uuid.NewV4().String()),
+		ServiceName: tryGetCfgString(ctx, "meta.service_name", "undefined-server"),
+		HostName:    hostName,
+		InstanceId:  tryGetCfgString(ctx, "meta.uuid", uuid.NewV4().String()),
 	}
 }
 

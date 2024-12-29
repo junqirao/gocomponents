@@ -114,6 +114,10 @@ func (i *Instance) fillInfo() *Instance {
 			i.Host = i.HostName
 		}
 	}
+	// overwrite service name if meta is set
+	if sn := meta.ServiceName(); sn != "" {
+		i.ServiceName = sn
+	}
 	return i
 }
 
