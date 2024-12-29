@@ -1,0 +1,19 @@
+server:
+  address: ":8000"
+  openapiPath: "/api.json"
+  swaggerPath: "/swagger"
+
+kvdb:
+  endpoints:
+    - kv.isz.lumosc.com:2379
+    - kv.isz.lumosc.com:2380
+    - kv.isz.lumosc.com:2381
+  username:
+  password:
+
+registry:
+  instance:
+    service_name: "test-service"
+    meta:
+      key1: "value1"
+      key2: 2
