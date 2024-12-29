@@ -18,6 +18,9 @@ func init() {
 
 	config.check()
 	Raw, err = newEtcd(ctx, config)
+	if err != nil {
+		panic(err)
+	}
 	// create Storages instance
 	Storages = newStorages(ctx, config, Raw)
 	return
