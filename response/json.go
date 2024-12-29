@@ -22,17 +22,16 @@ func WriteJSON(r *ghttp.Request, ec *Code) {
 }
 
 func WriteData(r *ghttp.Request, ec *Code, data ...interface{}) {
-	var dat interface{}
+	res := JSON{
+		Code:    ec.Code(),
+		Message: ec.Error(),
+	}
 	if len(data) > 0 && data[0] != nil {
-		dat = data[0]
+		res.Data = data[0]
 	}
 
 	r.Response.WriteHeader(ec.status)
-	r.Response.WriteJson(JSON{
-		Code:    ec.Code(),
-		Message: ec.Error(),
-		Data:    dat,
-	})
+	r.Response.WriteJson(res)
 }
 
 func Success(r *ghttp.Request, data ...interface{}) {
