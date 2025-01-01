@@ -2,6 +2,7 @@ package structs
 
 import (
 	"context"
+	"embed"
 	"reflect"
 	"testing"
 )
@@ -92,4 +93,14 @@ func TestMappingValue(t *testing.T) {
 	t.Logf("%+v", t5)
 	tp.Parse(context.Background(), t5)
 	t.Logf("%+v", t5)
+}
+
+//go:embed mapping
+var efs embed.FS
+
+func TestLoadMappingFromEmbed(t *testing.T) {
+	err := LoadMappingFromEmbed(context.Background(), efs)
+	if err != nil {
+		t.Fatal(err)
+	}
 }

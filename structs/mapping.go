@@ -1,8 +1,14 @@
 package structs
 
 import (
+	"context"
+	"embed"
+	"encoding/json"
+	"io/fs"
+	"strings"
 	"sync"
 
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
 )
 
@@ -48,6 +54,61 @@ func GetFieldMappingValue(name string, key any, def ...any) (val any) {
 		val = v
 	} else if len(def) > 0 {
 		val = def[0]
+	}
+	return
+}
+
+type (
+	mappingStorage     []mappingStorageUnit
+	mappingStorageUnit struct {
+		Name    string                   `json:"name"`
+		Content []mappingStorageKeyValue `json:"content"`
+	}
+	mappingStorageKeyValue struct {
+		Key any `json:"key"`
+		Val any `json:"value"`
+	}
+)
+
+func (u mappingStorageUnit) buildMap() map[any]any {
+	m := map[any]any{}
+	for _, kv := range u.Content {
+		m[kv.Key] = kv.Val
+	}
+	return m
+}
+
+func LoadMappingFromEmbed(ctx context.Context, efs embed.FS) (err error) {
+	dir, err := efs.ReadDir("mapping")
+	if err != nil {
+		return
+	}
+	for _, entry := range dir {
+		if !entry.IsDir() &&
+			!strings.HasSuffix(entry.Name(), ".json") {
+			continue
+		}
+		var (
+			info    fs.FileInfo
+			content []byte
+		)
+
+		if info, err = entry.Info(); err != nil {
+			return
+		}
+		if content, err = efs.ReadFile("mapping/" + info.Name()); err != nil {
+			return
+		}
+		storage := mappingStorage{}
+		if err = json.Unmarshal(content, &storage); err != nil {
+			return
+		}
+
+		for _, unit := range storage {
+			m := unit.buildMap()
+			SetFieldMapping(unit.Name, m)
+			g.Log().Infof(ctx, "structs field mapping loaded from: %s, %s (%v)", info.Name(), unit.Name, len(m))
+		}
 	}
 	return
 }
