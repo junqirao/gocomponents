@@ -65,6 +65,10 @@ func launch(do func(ctx context.Context), cfg *config) {
 		if err := registry.Init(ctx); err != nil {
 			panic(err)
 		}
+		// register grace automatically
+		grace.Register(ctx, "registry_deregister", func() {
+			_ = registry.Registry.Deregister(ctx)
+		})
 	}
 
 	// exec before hooks
