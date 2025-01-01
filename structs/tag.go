@@ -64,6 +64,19 @@ func (p *TagParser) Parse(ctx context.Context, v any) {
 	p.parse(ctx, typ, val)
 }
 
+func (p *TagParser) TryParse(ctx context.Context, v any) {
+	if v == nil {
+		return
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			g.Log().Warningf(ctx, "tag parser try parse error: %v", r)
+		}
+	}()
+
+	p.Parse(ctx, v)
+}
+
 func (p *TagParser) parse(ctx context.Context, typ reflect.Type, val reflect.Value) {
 	if typ.Kind() == reflect.Pointer || typ.Kind() == reflect.Interface {
 		if val.IsNil() {
