@@ -65,11 +65,11 @@ func (p *TagParser) Parse(ctx context.Context, v any) {
 }
 
 func (p *TagParser) parse(ctx context.Context, typ reflect.Type, val reflect.Value) {
-	if val.IsNil() {
-		return
-	}
-
 	if typ.Kind() == reflect.Pointer || typ.Kind() == reflect.Interface {
+		if val.IsNil() {
+			return
+		}
+
 		typ = typ.Elem()
 		val = val.Elem()
 	}
