@@ -263,6 +263,9 @@ func (r *registry) watchAndUpdateCache(ctx context.Context) {
 			}
 		}
 
+		if instance == nil {
+			return
+		}
 		r.pushEvent(instance, e.Type)
 	})
 	if err != nil {

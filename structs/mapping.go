@@ -65,17 +65,50 @@ type (
 		Content []mappingStorageKeyValue `json:"content"`
 	}
 	mappingStorageKeyValue struct {
-		Key any `json:"key"`
-		Val any `json:"value"`
+		Key       any       `json:"key"`
+		KeyType   fieldType `json:"key_type"`
+		Val       any       `json:"value"`
+		ValueType fieldType `json:"value_type"`
 	}
+	fieldType string
+)
+
+const (
+	fieldTypeString fieldType = "string"
+	fieldTypeInt    fieldType = "int"
+	fieldTypeUint   fieldType = "uint"
+	fieldTypeFloat  fieldType = "float"
 )
 
 func (u mappingStorageUnit) buildMap() map[any]any {
 	m := map[any]any{}
 	for _, kv := range u.Content {
-		m[kv.Key] = kv.Val
+		m[kv.GetKey()] = kv.GetValue()
 	}
 	return m
+}
+
+func (k mappingStorageKeyValue) GetKey() any {
+	return k.parse(k.KeyType, k.Key)
+}
+
+func (k mappingStorageKeyValue) GetValue() any {
+	return k.parse(k.ValueType, k.Val)
+}
+
+func (k mappingStorageKeyValue) parse(typ fieldType, val any) any {
+	var vv = val
+	switch typ {
+	case fieldTypeString:
+		vv = gconv.String(val)
+	case fieldTypeInt:
+		vv = gconv.Int(val)
+	case fieldTypeUint:
+		vv = gconv.Uint(val)
+	case fieldTypeFloat:
+		vv = gconv.Float64(val)
+	}
+	return vv
 }
 
 func LoadMappingFromEmbed(ctx context.Context, efs embed.FS) (err error) {

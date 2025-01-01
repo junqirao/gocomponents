@@ -4,10 +4,12 @@
     "content": [
       {
         "key": 0,
+        "key_type": "int",
         "value": "aaa"
       },
       {
         "key": 1,
+        "key_type": "int",
         "value": "bbb"
       }
     ]
@@ -17,14 +19,17 @@
     "content": [
       {
         "key": 0,
+        "key_type": "int",
         "value": "aaa"
       },
       {
         "key": 1,
+        "key_type": "int",
         "value": "bbb"
       },
       {
         "key": 2,
+        "key_type": "int",
         "value": "ccc"
       }
     ]

@@ -103,4 +103,6 @@ func TestLoadMappingFromEmbed(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	val := GetFieldMappingValue("test0", 0)
+	t.Logf("%+v", val)
 }
