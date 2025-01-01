@@ -49,7 +49,7 @@ func GetFieldMappingValue(name string, key any, def ...any) (val any) {
 	fm := value.(*FieldMapping)
 	fm.mu.RLock()
 	defer fm.mu.RUnlock()
-	v, ok := fm.m[key]
+	v, ok := fm.m[gconv.String(key)]
 	if ok {
 		val = v
 	} else if len(def) > 0 {
@@ -65,50 +65,17 @@ type (
 		Content []mappingStorageKeyValue `json:"content"`
 	}
 	mappingStorageKeyValue struct {
-		Key       any       `json:"key"`
-		KeyType   fieldType `json:"key_type"`
-		Val       any       `json:"value"`
-		ValueType fieldType `json:"value_type"`
+		Key   any `json:"key"`
+		Value any `json:"value"`
 	}
-	fieldType string
-)
-
-const (
-	fieldTypeString fieldType = "string"
-	fieldTypeInt    fieldType = "int"
-	fieldTypeUint   fieldType = "uint"
-	fieldTypeFloat  fieldType = "float"
 )
 
 func (u mappingStorageUnit) buildMap() map[any]any {
 	m := map[any]any{}
 	for _, kv := range u.Content {
-		m[kv.GetKey()] = kv.GetValue()
+		m[gconv.String(kv.Key)] = kv.Value
 	}
 	return m
-}
-
-func (k mappingStorageKeyValue) GetKey() any {
-	return k.parse(k.KeyType, k.Key)
-}
-
-func (k mappingStorageKeyValue) GetValue() any {
-	return k.parse(k.ValueType, k.Val)
-}
-
-func (k mappingStorageKeyValue) parse(typ fieldType, val any) any {
-	var vv = val
-	switch typ {
-	case fieldTypeString:
-		vv = gconv.String(val)
-	case fieldTypeInt:
-		vv = gconv.Int(val)
-	case fieldTypeUint:
-		vv = gconv.Uint(val)
-	case fieldTypeFloat:
-		vv = gconv.Float64(val)
-	}
-	return vv
 }
 
 func LoadMappingFromEmbed(ctx context.Context, efs embed.FS) (err error) {
