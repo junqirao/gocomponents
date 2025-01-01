@@ -62,49 +62,6 @@ func (p *TagParser) Parse(ctx context.Context, v any) {
 	)
 
 	p.parse(ctx, typ, val)
-
-	// if val.Kind() == reflect.Pointer || val.Kind() == reflect.Interface {
-	// 	val = val.Elem()
-	// } else {
-	// 	val = reflect.ValueOf(v)
-	// }
-	//
-	// fmt.Printf("val: isvalid:%v canaddr:%v\n", val.IsValid(), val.CanAddr())
-	//
-	// if kind := typ.Kind(); kind == reflect.Struct {
-	// 	for i := 0; i < typ.NumField(); i++ {
-	// 		var (
-	// 			value = val.Field(i)
-	// 			field = typ.Field(i)
-	// 		)
-	//
-	// 		p.mu.RLock()
-	// 		for _, t := range p.handlers {
-	// 			content := field.Tag.Get(t.name)
-	// 			if content == "" {
-	// 				continue
-	// 			}
-	//
-	// 			fmt.Printf("isvalid:%v canaddr:%v\n", value.IsValid(), value.CanAddr())
-	// 			t.fn(ctx, content, field, value)
-	// 		}
-	// 		p.mu.RUnlock()
-	//
-	// 		switch field.Type.Kind() {
-	// 		case reflect.Ptr:
-	// 			if !value.IsNil() {
-	// 				p.Parse(ctx, value.Elem().Interface())
-	// 			}
-	// 		case reflect.Struct:
-	// 			p.Parse(ctx, value.Interface())
-	// 		default:
-	// 		}
-	//
-	// 	}.
-
-	// } else if kind == reflect.Ptr {
-	// 	p.Parse(ctx, val.Elem().Interface())
-	// }
 }
 
 func (p *TagParser) parse(ctx context.Context, typ reflect.Type, val reflect.Value) {
