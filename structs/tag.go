@@ -114,7 +114,7 @@ var (
 					g.Log().Warningf(ctx, "using mapping parser, field %s type is not interface", field.Name)
 					return
 				}
-				if value.IsNil() || !value.CanSet() {
+				if value.IsNil() || !value.CanSet() || value.IsZero() {
 					return
 				}
 				value.Set(reflect.ValueOf(GetFieldMappingValue(content, value.Interface())))

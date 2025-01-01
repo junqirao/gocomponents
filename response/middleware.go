@@ -1,11 +1,13 @@
 package response
 
 import (
+	"context"
+
 	"github.com/gogf/gf/v2/net/ghttp"
 )
 
 type (
-	DataHandler = func(res any) any
+	DataHandler = func(ctx context.Context, res any) any
 )
 
 func Middleware(r *ghttp.Request) {
@@ -45,7 +47,7 @@ func MiddlewareWithDataHandler(hs ...DataHandler) ghttp.HandlerFunc {
 			if handler == nil {
 				continue
 			}
-			data = handler(data)
+			data = handler(r.Context(), data)
 		}
 
 		if ec == nil {
