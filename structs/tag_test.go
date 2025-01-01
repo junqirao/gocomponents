@@ -59,6 +59,7 @@ func TestTagParser(t *testing.T) {
 func TestMappingValue(t *testing.T) {
 	SetFieldMapping("test", map[any]any{
 		0: "OK",
+		1: 0,
 	})
 
 	t4 := &test4{Field: 0}
@@ -66,4 +67,29 @@ func TestMappingValue(t *testing.T) {
 	tp := NewTagParser(WithTagHandlerValueMapping())
 	tp.Parse(context.Background(), t4)
 	t.Logf("%+v", t4)
+	t.Log("==========================")
+	var t5 any = &test4{Field: 0}
+	t.Logf("%+v", t5)
+	tp.Parse(context.Background(), t5)
+	t.Logf("%+v", t5)
+	t.Log("==========================")
+	t5 = any(&test4{Field: 0})
+	t.Logf("%+v", t5)
+	tp.Parse(context.Background(), &t5)
+	t.Logf("%+v", t5)
+	t.Log("==========================")
+	t5 = reflect.ValueOf(any(&test4{Field: 0})).Interface()
+	t.Logf("%+v", t5)
+	tp.Parse(context.Background(), &t5)
+	t.Logf("%+v", t5)
+	t.Log("==========================")
+	t5 = reflect.ValueOf(any(&test4{Field: 0})).Interface()
+	t.Logf("%+v", t5)
+	tp.Parse(context.Background(), t5)
+	t.Logf("%+v", t5)
+	t.Log("==========================")
+	t5 = any(&test4{Field: 1})
+	t.Logf("%+v", t5)
+	tp.Parse(context.Background(), t5)
+	t.Logf("%+v", t5)
 }
