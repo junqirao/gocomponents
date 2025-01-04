@@ -3,7 +3,6 @@ package storage
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"io"
 	"net/url"
 	"time"
@@ -50,10 +49,13 @@ func (c minioCli) Delete(ctx context.Context, name string) (err error) {
 	return c.cli.RemoveObject(ctx, c.cfg.Bucket, name, minio.RemoveObjectOptions{})
 }
 
-func (c minioCli) SignGetUrl(ctx context.Context, name string, expires int64, attachment ...bool) (s string, err error) {
+func (c minioCli) SignGetUrl(ctx context.Context, name string, expires int64, contentType string, disposition string) (s string, err error) {
 	reqParams := make(url.Values)
-	if len(attachment) > 0 && attachment[0] {
-		reqParams.Set("response-content-disposition", fmt.Sprintf(`attachment; filename="%s"`, name))
+	if contentType != "" {
+		reqParams.Set("response-content-type", contentType)
+	}
+	if disposition != "" {
+		reqParams.Set("response-content-disposition", disposition)
 	}
 
 	u, err := c.cli.PresignedGetObject(ctx, c.cfg.Bucket, name, time.Duration(expires)*time.Second, reqParams)

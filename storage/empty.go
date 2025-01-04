@@ -28,7 +28,7 @@ func (e empty) Delete(ctx context.Context, name string) (err error) {
 	return
 }
 
-func (e empty) SignGetUrl(ctx context.Context, name string, expires int64, attachment ...bool) (s string, err error) {
+func (e empty) SignGetUrl(ctx context.Context, name string, expires int64, contentType string, disposition string) (s string, err error) {
 	err = ErrEmpty
 	return
 }

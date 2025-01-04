@@ -17,7 +17,7 @@ type (
 		Put(ctx context.Context, name string, r io.Reader) (key string, err error)
 		Get(ctx context.Context, name string) (rc io.ReadCloser, err error)
 		Delete(ctx context.Context, name string) (err error)
-		SignGetUrl(ctx context.Context, name string, expires int64, attachment ...bool) (s string, err error)
+		SignGetUrl(ctx context.Context, name string, expires int64, contentType string, disposition string) (s string, err error)
 		SignPutUrl(ctx context.Context, name string, expires int64) (s string, err error)
 	}
 )
