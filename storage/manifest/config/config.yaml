@@ -1,0 +1,15 @@
+storage:
+  default:
+    type: minio
+    endpoint: http://127.0.0.1:9000
+    access_id: minio
+    secret: minio123
+    bucket: default
+    ssl: false
+  test:
+    type: minio
+    endpoint: http://127.0.0.1:9000
+    access_id: minio
+    secret: minio123
+    bucket: test
+    ssl: false
