@@ -3,14 +3,15 @@ module github.com/junqirao/gocomponents
 go 1.23.4
 
 require (
+	github.com/boombuler/barcode v1.0.2
 	github.com/gogf/gf/contrib/drivers/mysql/v2 v2.8.3
 	github.com/gogf/gf/v2 v2.8.3
 	github.com/golang-jwt/jwt/v5 v5.2.1
+	github.com/minio/minio-go/v7 v7.0.82
 	go.etcd.io/etcd/client/v3 v3.5.17
 )
 
 require (
-	github.com/boombuler/barcode v1.0.2 // indirect
 	github.com/coreos/go-semver v0.3.0 // indirect
 	github.com/coreos/go-systemd/v22 v22.3.2 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
@@ -23,7 +24,6 @@ require (
 	github.com/klauspost/compress v1.17.11 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.8 // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect
-	github.com/minio/minio-go/v7 v7.0.82 // indirect
 	github.com/rs/xid v1.6.0 // indirect
 	go.etcd.io/etcd/api/v3 v3.5.17 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.5.17 // indirect
