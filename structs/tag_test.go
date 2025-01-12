@@ -35,6 +35,7 @@ type test5 struct {
 	Field4 bool    `default:"true"`
 	Field5 string  `default:"hello,world"`
 	Field6 int8    `default:"128"`
+	Field7 int8    `default:"100"`
 }
 
 func TestTagParser(t *testing.T) {
@@ -118,7 +119,9 @@ func TestLoadMappingFromEmbed(t *testing.T) {
 
 func TestDefaultValue(t *testing.T) {
 	parser := NewTagParser(WithTagHandlerDefaultVal())
-	t5 := &test5{}
+	t5 := &test5{
+		Field7: 99,
+	}
 	parser.Parse(context.Background(), t5)
 	t.Logf("%+v", t5)
 	if t5.Field1 != 127 {
@@ -138,5 +141,8 @@ func TestDefaultValue(t *testing.T) {
 	}
 	if t5.Field6 != -128 {
 		t.Fatal("field6 not equal")
+	}
+	if t5.Field7 != 99 {
+		t.Fatal("field7 not equal")
 	}
 }
