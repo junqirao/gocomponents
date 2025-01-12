@@ -17,7 +17,7 @@ type (
 func newStorage(name string, db Database, cfg Config) *storage {
 	name = strings.ReplaceAll(name, cfg.Separator, "")
 	return &storage{
-		prefix:   cfg.Prefix,
+		prefix:   cfg.Storage.Prefix,
 		cfg:      cfg,
 		name:     name,
 		Database: db,

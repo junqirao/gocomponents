@@ -63,7 +63,7 @@ func (s *storages) GetStorage(name string, uncached ...bool) Storage {
 }
 
 func (s *storages) watchAndUpdateCaches(ctx context.Context) {
-	pfx := s.cfg.Prefix
+	pfx := s.cfg.Storage.Prefix
 	err := s.db.Watch(ctx, pfx, func(ctx context.Context, e Event) {
 		pos := strings.Split(strings.TrimPrefix(e.Key, pfx), s.cfg.Separator)
 		if len(pos) == 0 {
