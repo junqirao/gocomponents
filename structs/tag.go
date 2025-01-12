@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/util/gconv"
 )
 
 type (
@@ -135,6 +136,31 @@ var (
 					return
 				}
 				value.Set(reflect.ValueOf(v))
+			})
+		}
+	}
+	// WithTagHandlerDefaultVal set default value for field when value not zero,
+	// supports type of string, int8/16/32/64, uint8/16/32/64, float32/64, bool.
+	WithTagHandlerDefaultVal = func() TagHandlerOption {
+		return func(t *TagParser) {
+			t.SetHandler("default", func(ctx context.Context, content string, field reflect.StructField, value reflect.Value) {
+				kind := field.Type.Kind()
+				if !value.CanSet() || !value.IsZero() {
+					return
+				}
+				switch kind {
+				case reflect.String:
+					value.SetString(content)
+				case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+					value.SetInt(gconv.Int64(content))
+				case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+					value.SetUint(gconv.Uint64(content))
+				case reflect.Float32, reflect.Float64:
+					value.SetFloat(gconv.Float64(content))
+				case reflect.Bool:
+					value.SetBool(gconv.Bool(content))
+				default:
+				}
 			})
 		}
 	}

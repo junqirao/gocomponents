@@ -28,6 +28,15 @@ type test4 struct {
 	Field any `mapping:"test"`
 }
 
+type test5 struct {
+	Field1 int8    `default:"127"`
+	Field2 uint16  `default:"65535"`
+	Field3 float64 `default:"3.14"`
+	Field4 bool    `default:"true"`
+	Field5 string  `default:"hello,world"`
+	Field6 int8    `default:"128"`
+}
+
 func TestTagParser(t *testing.T) {
 	tp := NewTagParser()
 	tp.SetHandler("tag1", func(ctx context.Context, content string, field reflect.StructField, value reflect.Value) {
@@ -105,4 +114,29 @@ func TestLoadMappingFromEmbed(t *testing.T) {
 	}
 	val := GetFieldMappingValue("test0", 0)
 	t.Logf("%+v", val)
+}
+
+func TestDefaultValue(t *testing.T) {
+	parser := NewTagParser(WithTagHandlerDefaultVal())
+	t5 := &test5{}
+	parser.Parse(context.Background(), t5)
+	t.Logf("%+v", t5)
+	if t5.Field1 != 127 {
+		t.Fatal("field1 not equal")
+	}
+	if t5.Field2 != 65535 {
+		t.Fatal("field2 not equal")
+	}
+	if t5.Field3 != 3.14 {
+		t.Fatal("field3 not equal")
+	}
+	if t5.Field4 != true {
+		t.Fatal("field4 not equal")
+	}
+	if t5.Field5 != "hello,world" {
+		t.Fatal("field5 not equal")
+	}
+	if t5.Field6 != -128 {
+		t.Fatal("field6 not equal")
+	}
 }
