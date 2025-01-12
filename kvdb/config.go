@@ -6,6 +6,7 @@ import (
 
 const (
 	defaultIdentitySeparator = "/"
+	defaultStoragePrefix     = "/storage/"
 )
 
 type (
@@ -19,6 +20,10 @@ type (
 		Tls *TlsConfig `json:"tls"`
 		// separator for key in database, default "/"
 		Separator string `json:"separator"`
+		// storage module config
+		Storage StorageConfig `json:"storage"`
+	}
+	StorageConfig struct {
 		// key prefix, default "/storage/"
 		// start with "/",and end with "/" in etcd
 		Prefix string `json:"prefix"`
@@ -42,5 +47,8 @@ func (c *Config) tlsConfig() *tls.Config {
 func (c *Config) check() {
 	if c.Separator == "" {
 		c.Separator = defaultIdentitySeparator
+	}
+	if c.Storage.Prefix == "" {
+		c.Storage.Prefix = defaultStoragePrefix
 	}
 }
