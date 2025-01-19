@@ -10,7 +10,7 @@ import (
 	"github.com/gogf/gf/v2/os/glog"
 )
 
-func Execute(ctx context.Context, root *Node, nlc NodeLifeCycle, input map[string]any, async ...bool) (output map[string]any, err error) {
+func ExecuteNode(ctx context.Context, root *Node, nlc NodeLifeCycle, input map[string]any, async ...bool) (output map[string]any, err error) {
 	if root == nil {
 		return
 	}
@@ -91,7 +91,7 @@ func executeLevelAsync(ctx context.Context, nodes []*Node, nlc NodeLifeCycle, in
 				return
 			}
 			// execute script
-			handleScript(childCtx, node, nlc, in, input, res, results)
+			handleNodeScript(childCtx, node, nlc, in, input, res, results)
 			// set output
 			results.Set(node.Name, res)
 		}()
@@ -141,12 +141,12 @@ func execute(ctx context.Context, nodes []*Node, nlc NodeLifeCycle, input *gmap.
 		// set output
 		results.Set(node.Name, res)
 		// execute script
-		handleScript(childCtx, node, nlc, in, input, res, results)
+		handleNodeScript(childCtx, node, nlc, in, input, res, results)
 	}
 	return
 }
 
-func handleScript(ctx context.Context, node *Node, nlc NodeLifeCycle,
+func handleNodeScript(ctx context.Context, node *Node, nlc NodeLifeCycle,
 	nodeIn map[string]any, input *gmap.StrAnyMap,
 	output any, results *gmap.Map) {
 	if node.Script == "" {
@@ -154,7 +154,7 @@ func handleScript(ctx context.Context, node *Node, nlc NodeLifeCycle,
 	}
 
 	fm := nlc.BeforeScript(ctx, node, nodeIn, output)
-	setDefaultFunctions(ctx, node, fm, input, results)
+	setNodeDefaultFunctions(ctx, node, fm, input, results, output)
 
 	var (
 		execRes = &ScriptExecuteResult{}

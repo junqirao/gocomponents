@@ -1,0 +1,40 @@
+name: test_name
+meta:
+  method: GET
+  path: /test
+parameters:
+  - name: test_parameter
+    validate:
+      rule: required|length:6,16|same:test
+      message:
+        required: test_parameter is required.
+        same: test_parameter not equal to test
+    meta:
+      from: header
+  - name: test
+    validate:
+      rule: required|length:6,16
+      message: test is required.
+    meta: {}
+node:
+  name: test_node
+  meta:
+    times: 2
+  must: true
+  children:
+    - name: test_child
+      meta:
+        final_result: true
+      must: false
+      children: []
+      input_filter: []
+      script: '{{ .node.Name | set_result "test" }} {{ get_result "test_node" | set_result .node.Name }}'
+  input_filter:
+    - test
+    - test_parameter as test1
+  script: '
+      {{ info "data=%+v" .output }}
+      {{ md5 .output.data | set_map_value .output "data" }}
+      {{ get_result "test_parameter" | info "result=%+v" }}'
+async: true
+script: ""

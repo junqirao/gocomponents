@@ -13,22 +13,18 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-type testInputStruct struct {
-	Output any `json:"output"`
-}
-
 type testNodeLifeCycle struct {
 	ctxKeyId string
 }
 
 func (t *testNodeLifeCycle) BeforeExecute(ctx context.Context, node *Node, input map[string]any) (err error) {
-	fmt.Println("------------")
-	fmt.Printf("[BeforeExecute][uuid:%v][node:%v]  input: %+v\n", ctx.Value(t.ctxKeyId), ctx.Value(CtxKeyNodeName), input)
+	fmt.Println("------------ NodeLifeCycle Start ------------")
+	fmt.Printf("[BeforeExecute][uuid:%v][node:%v] input: %+v\n", ctx.Value(t.ctxKeyId), ctx.Value(CtxKeyNodeName), input)
 	return
 }
 
 func (t *testNodeLifeCycle) Execute(ctx context.Context, node *Node, input map[string]any) (output any, err error) {
-	fmt.Printf("[Execute      ][uuid:%v][node:%v] input: %+v\n", ctx.Value(t.ctxKeyId), ctx.Value(CtxKeyNodeName), input)
+	fmt.Printf("[ExecuteNode  ][uuid:%v][node:%v] input: %+v\n", ctx.Value(t.ctxKeyId), ctx.Value(CtxKeyNodeName), input)
 	if node.Name == "7" {
 		return node.Meta, nil
 	}
@@ -46,10 +42,10 @@ func (t *testNodeLifeCycle) BeforeScript(ctx context.Context, node *Node, input 
 			return gconv.String(v)
 		},
 		"md5": func(v any) string {
-			return gmd5.MustEncrypt(v)
+			return gmd5.MustEncrypt(gconv.String(v))
 		},
 	}
-	fmt.Println("------------")
+	fmt.Println("------------ NodeLifeCycle End ------------")
 	return
 }
 
@@ -121,6 +117,12 @@ func TestNode(t *testing.T) {
 		},
 	}
 
+	proto := Proto{Node: root}
+	if err := proto.Check(context.Background()); err != nil {
+		t.Fatal(err)
+		return
+	}
+
 	bs, _ := gyaml.Encode(root)
 	fmt.Println(string(bs))
 
@@ -129,7 +131,7 @@ func TestNode(t *testing.T) {
 
 	ctx := context.Background()
 	t.Log("=============== test sync ===============")
-	m, err := Execute(context.WithValue(ctx, "uuid", uuid.NewV4().String()), root, nlc, input)
+	m, err := ExecuteNode(context.WithValue(ctx, "uuid", uuid.NewV4().String()), root, nlc, input)
 	if err != nil {
 		t.Fatal(err)
 		return
@@ -158,7 +160,7 @@ func TestNode(t *testing.T) {
 	}
 	doCheck(m)
 	t.Log("=============== test async ===============")
-	m, err = Execute(context.WithValue(ctx, "uuid", uuid.NewV4().String()), root, nlc, input, true)
+	m, err = ExecuteNode(context.WithValue(ctx, "uuid", uuid.NewV4().String()), root, nlc, input, true)
 	if err != nil {
 		t.Fatal(err)
 		return

@@ -15,13 +15,14 @@ const (
 	FuncNameGetInput    = "get_input"
 	FuncNameSetResult   = "set_result"
 	FuncNameGetResult   = "get_result"
+	FuncNameNewMap      = "new_map"
 	FuncNameSetMapValue = "set_map_value"
 	FuncNameLogInfo     = "info"
 	FuncNameLogWarning  = "warning"
 	FuncNameLogError    = "error"
 )
 
-func setDefaultFunctions(ctx context.Context, node *Node, fm template.FuncMap, input *gmap.StrAnyMap, results *gmap.Map) {
+func setNodeDefaultFunctions(ctx context.Context, node *Node, fm template.FuncMap, input *gmap.StrAnyMap, results *gmap.Map, out any) {
 	fm[FuncNameSetInput] = func(k string, v any) error {
 		input.Set(k, v)
 		return nil
@@ -39,6 +40,10 @@ func setDefaultFunctions(ctx context.Context, node *Node, fm template.FuncMap, i
 	fm[FuncNameGetResult] = func(k string) any {
 		return results.Get(k)
 	}
+	setDefaultFunctions(ctx, fm)
+}
+
+func setDefaultFunctions(ctx context.Context, fm template.FuncMap) {
 	fm[FuncNameLogInfo] = func(format string, v ...any) any {
 		glog.Infof(ctx, format, v...)
 		return nil
@@ -52,6 +57,10 @@ func setDefaultFunctions(ctx context.Context, node *Node, fm template.FuncMap, i
 		return nil
 	}
 	fm[FuncNameSetMapValue] = SetMapValue
+	fm[FuncNameNewMap] = func() map[string]any {
+		return make(map[string]any)
+	}
+
 }
 
 func SetMapValue(m any, index string, v any) any {

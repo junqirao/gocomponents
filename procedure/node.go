@@ -17,7 +17,7 @@ type (
 		// using same name.
 		Name string `json:"name"`
 		// Meta data
-		Meta map[string]any `json:"meta"`
+		Meta Meta `json:"meta"`
 		// Must execute success flag.
 		// checks NodeLifeCycle.Execute return error
 		Must bool `json:"must"`
@@ -26,7 +26,7 @@ type (
 		// InputFilter of node, supported alias usage,
 		// e.g. "aaa as bbb" empty means no filter,
 		// all input will be passed
-		InputFilter []string `json:"input_filter"`
+		InputFilter []string `json:"input_filter" yaml:"input_filter"`
 		// Script in go template syntax
 		Script Script `json:"script"`
 		// directParent node
@@ -52,14 +52,10 @@ func (n *Node) filterInput(in map[string]any) map[string]any {
 			continue
 		}
 		var (
-			parts   = strings.Split(s, " as ")
-			key, as string
+			parts = strings.Split(s, " as ")
+			key   = parts[0]
+			as    = key
 		)
-
-		if len(parts) == 1 {
-			key = parts[0]
-			as = key
-		}
 
 		if len(parts) > 1 {
 			as = parts[1]

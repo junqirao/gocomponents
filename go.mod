@@ -8,6 +8,7 @@ require (
 	github.com/gogf/gf/v2 v2.8.3
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/minio/minio-go/v7 v7.0.83
+	github.com/pkg/errors v0.8.1
 	go.etcd.io/etcd/client/v3 v3.5.17
 )
 
