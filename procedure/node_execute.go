@@ -58,13 +58,15 @@ func executeLevelAsync(ctx context.Context, nodes []*Node, nlc NodeLifeCycle, in
 	}
 
 	var (
-		wg   = &sync.WaitGroup{}
+		wg = &sync.WaitGroup{}
+		// lock for script
+		mu   = &sync.Mutex{}
 		errs = gmap.New(true)
 	)
 
 	wg.Add(len(nodes))
 	for _, node := range nodes {
-		go func() {
+		go func(node *Node) {
 			defer func() {
 				if rec := recover(); rec != nil {
 					errs.Set(node, rec.(error))
@@ -90,11 +92,13 @@ func executeLevelAsync(ctx context.Context, nodes []*Node, nlc NodeLifeCycle, in
 				errs.Set(node, err)
 				return
 			}
+			mu.Lock()
 			// execute script
 			handleNodeScript(childCtx, node, nlc, in, input, res, results)
+			mu.Unlock()
 			// set output
 			results.Set(node.Name, res)
-		}()
+		}(node)
 	}
 	wg.Wait()
 

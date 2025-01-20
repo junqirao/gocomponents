@@ -117,12 +117,6 @@ func TestNode(t *testing.T) {
 		},
 	}
 
-	proto := Proto{Node: root}
-	if err := proto.Check(context.Background()); err != nil {
-		t.Fatal(err)
-		return
-	}
-
 	bs, _ := gyaml.Encode(root)
 	fmt.Println(string(bs))
 

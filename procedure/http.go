@@ -37,6 +37,10 @@ func (g GoFrameHTTPInputHandler) HandleInput(ctx context.Context, proto *Proto) 
 		default:
 			if v, ok := reqMap[parameter.Name]; ok {
 				val.Set(v)
+			} else {
+				// try to get header
+				// reqMap not include header
+				val.Set(req.GetHeader(parameter.Name))
 			}
 		}
 		if !val.IsNil() && !val.IsEmpty() {
