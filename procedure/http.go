@@ -58,12 +58,9 @@ func BindGHTTPRouter(ctx context.Context, group *ghttp.RouterGroup, lc LifeCycle
 			return
 		}
 		var (
-			path    = p.Meta.Get("path").String()
-			method  = strings.ToUpper(p.Meta.Get("method").String())
-			handler = func(r *ghttp.Request) {
-				out, err := p.Execute(r.Context())
-				responseHandler(r, out, err)
-			}
+			path     = p.Meta.Get("path").String()
+			method   = strings.ToUpper(p.Meta.Get("method").String())
+			handler  = wrapGoFrameHttpHandler(p, responseHandler)
 			bindFunc func(pattern string, object interface{}, params ...interface{}) *ghttp.RouterGroup
 		)
 
@@ -95,4 +92,11 @@ func BindGHTTPRouter(ctx context.Context, group *ghttp.RouterGroup, lc LifeCycle
 		glog.Infof(ctx, "bind proto %s path %s method %s done", p.Name, path, method)
 	}
 	return
+}
+
+func wrapGoFrameHttpHandler(p *Proto, responseHandler func(r *ghttp.Request, res any, err error)) func(r *ghttp.Request) {
+	return func(r *ghttp.Request) {
+		out, err := p.Execute(r.Context())
+		responseHandler(r, out, err)
+	}
 }
