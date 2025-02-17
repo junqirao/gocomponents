@@ -1,10 +1,11 @@
 kvdb:
-  endpoints:
-    - kv.isz.lumosc.com:2379
-    - kv.isz.lumosc.com:2380
-    - kv.isz.lumosc.com:2381
-  username:
-  password:
+  database:
+    endpoints:
+      - 172.18.28.240:2379
+      - 172.18.28.240:2380
+      - 172.18.28.240:2381
+    username: "root"
+    password: "qBLQveYC5ajVYNWOCT0WZAU5ent7OABC"
 
 registry:
   instance:

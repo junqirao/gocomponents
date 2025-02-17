@@ -5,14 +5,18 @@ import (
 	"fmt"
 	"testing"
 	"time"
+
+	"github.com/junqirao/gocomponents/kvdb"
 )
 
-func getConfig() Config {
-	return Config{}
+func getConfig() *Config {
+	return &Config{
+		Prefix: "/test-registry/",
+	}
 }
 
 func TestInitWithoutInstance(t *testing.T) {
-	err := Init(context.Background())
+	err := InitWithConfig(context.Background(), getConfig(), kvdb.MustGetDatabase(context.Background()))
 	if err != nil {
 		t.Fatal(err)
 		return
@@ -20,7 +24,7 @@ func TestInitWithoutInstance(t *testing.T) {
 }
 
 func TestInit(t *testing.T) {
-	err := Init(context.Background(),
+	err := InitWithConfig(context.Background(), getConfig(), kvdb.MustGetDatabase(context.Background()),
 		NewInstance("test-service").
 			WithAddress("127.0.0.1", 8080).
 			WithMetaData(map[string]interface{}{"key": "value"}))
@@ -42,7 +46,7 @@ func TestInit(t *testing.T) {
 }
 
 func TestRegistry(t *testing.T) {
-	err := Init(context.Background(),
+	err := InitWithConfig(context.Background(), getConfig(), kvdb.MustGetDatabase(context.Background()),
 		NewInstance("test-service").
 			WithAddress("127.0.0.1", 8080).
 			WithMetaData(map[string]interface{}{"key": "value"}))

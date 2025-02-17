@@ -15,10 +15,6 @@ var (
 )
 
 type (
-	// StorageConfig for storage module
-	StorageConfig struct {
-		Separator string `json:"separator"`
-	}
 	// Storage interface
 	Storage interface {
 		// Get value

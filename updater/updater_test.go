@@ -190,7 +190,7 @@ registry:
 		return
 	}
 
-	database := kvdb.Raw
+	database := kvdb.MustGetDatabase(context.Background())
 	adaptor := NewKVDatabaseAdaptor(database)
 	wg := sync.WaitGroup{}
 	wg.Add(3)
@@ -257,7 +257,7 @@ registry:
 		return
 	}
 	g.Cfg().SetAdapter(content)
-	database := kvdb.Raw
+	database := kvdb.MustGetDatabase(context.Background())
 	adaptor := NewKVDatabaseAdaptor(database)
 	t.Log("try update")
 	err = Update2Latest(ctx, adaptor, fis...)
@@ -308,7 +308,7 @@ registry:
 		return
 	}
 	g.Cfg().SetAdapter(content)
-	database := kvdb.Raw
+	database := kvdb.MustGetDatabase(context.Background())
 	adaptor := NewKVDatabaseAdaptor(database)
 	t.Log("try update")
 	err = Update2Latest(ctx, adaptor, fis...)
@@ -345,7 +345,7 @@ registry:
 		return
 	}
 	g.Cfg().SetAdapter(content)
-	database := kvdb.Raw
+	database := kvdb.MustGetDatabase(context.Background())
 	adaptor := NewKVDatabaseAdaptor(database)
 	t.Log("try update")
 	err = Update2Latest(ctx, adaptor, fis...)

@@ -32,7 +32,7 @@ func (c *Config) check() {
 	if c.HeartBeatInterval == 0 {
 		c.HeartBeatInterval = defaultHeartBeatInterval
 	}
-	if c.Instance.Port == 0 {
+	if c.Instance != nil && c.Instance.Port == 0 {
 		// try to get server.address
 		v, err := g.Cfg().Get(context.Background(), "server.address")
 		if err == nil {

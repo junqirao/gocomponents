@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 
 	"github.com/junqirao/gocomponents/grace"
+	"github.com/junqirao/gocomponents/kvdb"
 	"github.com/junqirao/gocomponents/meta"
 	"github.com/junqirao/gocomponents/registry"
 )
@@ -62,7 +63,7 @@ func launch(do func(ctx context.Context), cfg *config) {
 	}
 
 	if !cfg.disableRegistry {
-		if err := registry.Init(ctx); err != nil {
+		if err := registry.Init(ctx, kvdb.MustGetDatabase(ctx)); err != nil {
 			panic(err)
 		}
 		// register grace automatically

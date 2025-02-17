@@ -6,9 +6,7 @@ import (
 	"os"
 	"sync"
 
-	uuid "github.com/satori/go.uuid"
-
-	"github.com/junqirao/gocomponents/meta"
+	"github.com/google/uuid"
 )
 
 type (
@@ -77,10 +75,10 @@ func (i *Instance) registryIdentity(prefix ...string) string {
 }
 
 func (i *Instance) clone() *Instance {
-	m := make(map[string]interface{})
+	meta := make(map[string]interface{})
 	if i.Meta != nil {
 		for k, v := range i.Meta {
-			m[k] = v
+			meta[k] = v
 		}
 	}
 	return &Instance{
@@ -89,13 +87,13 @@ func (i *Instance) clone() *Instance {
 		HostName:    i.HostName,
 		Port:        i.Port,
 		ServiceName: i.ServiceName,
-		Meta:        m,
+		Meta:        meta,
 	}
 }
 
 func (i *Instance) fillInfo() *Instance {
 	if i.Id == "" {
-		i.Id = uuid.NewV4().String()
+		i.Id = uuid.New().String()
 	}
 	// try fetch host name if not exist
 	if i.HostName == "" {
@@ -108,15 +106,11 @@ func (i *Instance) fillInfo() *Instance {
 	// try to get ip address it host field not set,
 	// if failed to get ipv4 address use hostname as host
 	if i.Host == "" {
-		if ip := meta.IPV4(); ip != "" {
-			i.Host = ip
+		if ip, err := getIp(); err == nil {
+			i.Host = ip.String()
 		} else {
 			i.Host = i.HostName
 		}
-	}
-	// overwrite service name if meta is set
-	if sn := meta.ServiceName(); sn != "" {
-		i.ServiceName = sn
 	}
 	return i
 }

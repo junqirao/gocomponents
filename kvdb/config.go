@@ -14,6 +14,10 @@ type (
 		// etcd tls
 		Tls *TlsConfig `json:"tls"`
 	}
+	// StorageConfig for storage module
+	StorageConfig struct {
+		Separator string `json:"separator"`
+	}
 	// TlsConfig ...
 	TlsConfig struct {
 		InsecureSkipVerify bool `json:"insecure_skip_verify"`

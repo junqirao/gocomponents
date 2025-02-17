@@ -8,7 +8,9 @@ import (
 )
 
 var (
-	Raw Database
+	Raw              Database
+	databaseOnceInit sync.Once
+	storageOnceInit  sync.Once
 )
 
 type (

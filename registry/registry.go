@@ -42,7 +42,7 @@ type (
 	}
 
 	// EventType of instance change
-	EventType = kvdb.EventType
+	EventType string
 	// EventHandler of instance change
 	EventHandler func(i *Instance, e EventType)
 	// eventWrapper ...
@@ -52,41 +52,28 @@ type (
 	}
 )
 
-// Init registry module with config and sync services info.
-// from database and build local caches.
+// Init registry module with config and sync services info from database and build local caches.
 // if *Instance is provided will be register automatically.
-// if context is done, watch loop will stop and local cache
-// won't be updated anymore.
-func Init(ctx context.Context, ins ...*Instance) (err error) {
+// if context is done, watch loop will stop and local cache won't be updated anymore.
+func Init(ctx context.Context, db kvdb.Database, ins ...*Instance) (err error) {
+	config := &Config{}
+	if err = g.Cfg().MustGet(ctx, "registry").Scan(&config); err != nil {
+		return
+	}
+	return InitWithConfig(ctx, config, db, ins...)
+}
+
+func InitWithConfig(ctx context.Context, config *Config, db kvdb.Database, ins ...*Instance) (err error) {
 	onceLoad.Do(func() {
-		var (
-			v        *g.Var
-			config   = Config{}
-			instance *Instance
-		)
-
-		v, err = g.Cfg().Get(ctx, "registry")
-		if err != nil {
-			return
-		}
-		if err = v.Struct(&config); err != nil {
-			return
-		}
-
 		config.check()
-
 		// create registry instance
-		if Registry, err = newRegistry(ctx, config, kvdb.Raw); err != nil {
+		if Registry, err = newRegistry(ctx, *config, db); err != nil {
 			return
 		}
 		// collect instance info and register
 		if len(ins) > 0 && ins[0] != nil {
-			instance = ins[0]
-		} else {
-			instance = config.Instance
+			err = Registry.register(ctx, ins[0].fillInfo().clone())
 		}
-
-		err = Registry.register(ctx, instance.fillInfo().clone())
 	})
 	return
 }
@@ -263,17 +250,14 @@ func (r *registry) watchAndUpdateCache(ctx context.Context) {
 			}
 		}
 
-		if instance == nil {
-			return
-		}
-		r.pushEvent(instance, e.Type)
+		r.pushEvent(instance, EventType(e.Type))
 	})
 	if err != nil {
 		g.Log().Errorf(ctx, "registry failed to watchAndUpdateCache etcd: %v", err)
 	}
 }
 
-func (r *registry) pushEvent(instance *Instance, e kvdb.EventType) {
+func (r *registry) pushEvent(instance *Instance, e EventType) {
 	ins := instance.clone()
 	p := r.evs
 	for p != nil {
