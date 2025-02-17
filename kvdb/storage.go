@@ -2,6 +2,7 @@ package kvdb
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"sync"
 
@@ -14,6 +15,10 @@ var (
 )
 
 type (
+	// StorageConfig for storage module
+	StorageConfig struct {
+		Separator string `json:"separator"`
+	}
 	// Storage interface
 	Storage interface {
 		// Get value
@@ -29,14 +34,14 @@ type (
 	StorageEventHandler func(t EventType, key string, value interface{})
 	storages            struct {
 		ctx context.Context
-		cfg Config
+		cfg StorageConfig
 		db  Database
 		m   sync.Map // key: (name)string, value: Storage
 		evs sync.Map // key: (name)string, value: StorageEventHandler
 	}
 )
 
-func newStorages(ctx context.Context, cfg Config, db Database) *storages {
+func newStorages(ctx context.Context, cfg StorageConfig, db Database) *storages {
 	sto := &storages{ctx: ctx, cfg: cfg, db: db}
 	// watch and update caches event bus
 	sto.watchAndUpdateCaches(ctx)
@@ -52,7 +57,7 @@ func (s *storages) GetStorage(name string, uncached ...bool) Storage {
 	}
 
 	if cs == nil {
-		cs = newCachedStorage(s.ctx, newStorage(name, s.db, s.cfg))
+		cs = newCachedStorage(s.ctx, newStorage(s.getStoragePrefix(), name, s.db, s.cfg))
 		s.m.Store(name, cs)
 	}
 
@@ -63,7 +68,7 @@ func (s *storages) GetStorage(name string, uncached ...bool) Storage {
 }
 
 func (s *storages) watchAndUpdateCaches(ctx context.Context) {
-	pfx := s.cfg.Storage.Prefix
+	pfx := s.getStoragePrefix()
 	err := s.db.Watch(ctx, pfx, func(ctx context.Context, e Event) {
 		pos := strings.Split(strings.TrimPrefix(e.Key, pfx), s.cfg.Separator)
 		if len(pos) == 0 {
@@ -89,4 +94,8 @@ func (s *storages) watchAndUpdateCaches(ctx context.Context) {
 
 func (s *storages) SetEventHandler(name string, handler StorageEventHandler) {
 	s.evs.Store(name, handler)
+}
+
+func (s *storages) getStoragePrefix() string {
+	return fmt.Sprintf("%sstorage/", s.cfg.Separator)
 }

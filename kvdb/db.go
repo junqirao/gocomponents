@@ -41,7 +41,6 @@ type (
 	}
 	// EventType of instance change
 	EventType string
-	// EventHandler of instance change
 )
 
 // event type define

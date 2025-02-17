@@ -1,27 +1,40 @@
 package kvdb
 
 import (
+	"context"
+
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gctx"
 )
 
-func init() {
+func Init(ctx context.Context) (err error) {
 	var (
-		ctx    = gctx.GetInitCtx()
 		config = Config{}
 	)
-	err := g.Cfg().MustGet(ctx, "kvdb").Struct(&config)
-	if err != nil {
+	if err = g.Cfg().MustGet(ctx, "kvdb.database").Struct(&config); err != nil {
 		g.Log().Errorf(ctx, "kvdb failed to parse config: %v", err)
 		return
 	}
 
-	config.check()
 	Raw, err = newEtcd(ctx, config)
-	if err != nil {
-		panic(err)
+	return
+}
+
+func InitStorage(ctx context.Context, db ...Database) (err error) {
+	var (
+		config = StorageConfig{}
+	)
+	if err = g.Cfg().MustGet(ctx, "kvdb.storage").Struct(&config); err != nil {
+		g.Log().Errorf(ctx, "kvdb failed to parse config: %v", err)
+		return
+	}
+	if config.Separator == "" {
+		config.Separator = "/"
+	}
+	database := Raw
+	if len(db) > 0 && db[0] != nil {
+		database = db[0]
 	}
 	// create Storages instance
-	Storages = newStorages(ctx, config, Raw)
+	Storages = newStorages(ctx, config, database)
 	return
 }

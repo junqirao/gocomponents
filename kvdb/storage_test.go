@@ -20,6 +20,16 @@ func dfs(node *storageNode) {
 	})
 }
 func TestCachedStorage(t *testing.T) {
+	err := Init(context.Background())
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	err = InitStorage(context.Background())
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
 
 	sto := Storages.GetStorage("test")
 	cs := sto.(*cachedStorage)
@@ -66,7 +76,7 @@ func TestCachedStorage(t *testing.T) {
 	}
 
 	fmt.Println("build cache ---------------")
-	err := sto.Set(context.Background(), "key", "value")
+	err = sto.Set(context.Background(), "key", "value")
 	if err != nil {
 		t.Fatal(err)
 		return
@@ -145,6 +155,17 @@ func TestCachedStorage(t *testing.T) {
 }
 
 func TestEvent(t *testing.T) {
+	err := Init(context.Background())
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	err = InitStorage(context.Background())
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+
 	go func() {
 		for {
 			dfs(Storages.GetStorage("test").(*cachedStorage).root)
@@ -157,8 +178,19 @@ func TestEvent(t *testing.T) {
 }
 
 func TestStorage_SetTTL(t *testing.T) {
+	err := Init(context.Background())
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	err = InitStorage(context.Background())
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+
 	sto := Storages.GetStorage("test_ttl")
-	err := sto.SetTTL(context.Background(), "test_ttl", "value", 10)
+	err = sto.SetTTL(context.Background(), "test_ttl", "value", 10)
 	if err != nil {
 		t.Fatal(err)
 		return

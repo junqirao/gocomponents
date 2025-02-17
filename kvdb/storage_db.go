@@ -8,16 +8,16 @@ import (
 type (
 	storage struct {
 		prefix string
-		cfg    Config
+		cfg    StorageConfig
 		name   string
 		Database
 	}
 )
 
-func newStorage(name string, db Database, cfg Config) *storage {
+func newStorage(prefix, name string, db Database, cfg StorageConfig) *storage {
 	name = strings.ReplaceAll(name, cfg.Separator, "")
 	return &storage{
-		prefix:   cfg.Storage.Prefix,
+		prefix:   prefix,
 		cfg:      cfg,
 		name:     name,
 		Database: db,
