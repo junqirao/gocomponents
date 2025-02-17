@@ -16,6 +16,9 @@ func NewMutex(ctx context.Context, name string, database ...Database) (mu Mutex,
 	if len(database) > 0 {
 		db = database[0]
 	}
+	if db == nil {
+		db = MustGetDatabase(ctx)
+	}
 
 	locker, err := db.Locker(ctx, fmt.Sprintf("lock_%s", name))
 	if err != nil {
