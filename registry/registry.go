@@ -73,12 +73,12 @@ func InitWithConfig(ctx context.Context, config *Config, db kvdb.Database, ins .
 		// collect instance info and register
 		var instance *Instance
 		if len(ins) > 0 && ins[0] != nil {
-			instance = ins[0].clone().fillInfo()
+			instance = ins[0]
 		} else {
 			instance = config.Instance
 		}
 		if instance != nil {
-			err = Registry.register(ctx, instance)
+			err = Registry.register(ctx, instance.clone().fillInfo())
 		}
 	})
 	return
