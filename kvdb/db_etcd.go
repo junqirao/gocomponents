@@ -12,11 +12,11 @@ import (
 	"go.etcd.io/etcd/client/v3/concurrency"
 )
 
-type etcd struct {
+type Etcd struct {
 	cli *clientv3.Client
 }
 
-func newEtcd(ctx context.Context, cfg Config) (h *etcd, err error) {
+func NewEtcd(ctx context.Context, cfg Config) (h *Etcd, err error) {
 	client, err := clientv3.New(clientv3.Config{
 		Endpoints:   cfg.Endpoints,
 		DialTimeout: time.Second * 10,
@@ -25,11 +25,11 @@ func newEtcd(ctx context.Context, cfg Config) (h *etcd, err error) {
 		Password:    cfg.Password,
 		Context:     ctx,
 	})
-	h = &etcd{cli: client}
+	h = &Etcd{cli: client}
 	return
 }
 
-func (e *etcd) Get(ctx context.Context, key string) (v []*KV, err error) {
+func (e *Etcd) Get(ctx context.Context, key string) (v []*KV, err error) {
 	if strings.HasSuffix(key, "/") {
 		return e.GetPrefix(ctx, key)
 	}
@@ -48,7 +48,7 @@ func (e *etcd) Get(ctx context.Context, key string) (v []*KV, err error) {
 	return
 }
 
-func (e *etcd) GetPrefix(ctx context.Context, key string) (v []*KV, err error) {
+func (e *Etcd) GetPrefix(ctx context.Context, key string) (v []*KV, err error) {
 	resp, err := e.cli.Get(ctx, key, clientv3.WithPrefix())
 	if err != nil {
 		return
@@ -63,7 +63,7 @@ func (e *etcd) GetPrefix(ctx context.Context, key string) (v []*KV, err error) {
 	return
 }
 
-func (e *etcd) Set(ctx context.Context, key string, value interface{}, ttl int64, keepalive ...bool) (err error) {
+func (e *Etcd) Set(ctx context.Context, key string, value interface{}, ttl int64, keepalive ...bool) (err error) {
 	opts := make([]clientv3.OpOption, 0)
 	if strings.HasSuffix(key, "/") {
 		opts = append(opts, clientv3.WithPrefix())
@@ -83,7 +83,7 @@ func (e *etcd) Set(ctx context.Context, key string, value interface{}, ttl int64
 	return
 }
 
-func (e *etcd) keepalive(ctx context.Context, lease clientv3.Lease, id clientv3.LeaseID) {
+func (e *Etcd) keepalive(ctx context.Context, lease clientv3.Lease, id clientv3.LeaseID) {
 	resCh, err := lease.KeepAlive(ctx, id)
 	if err != nil {
 		return
@@ -92,14 +92,14 @@ func (e *etcd) keepalive(ctx context.Context, lease clientv3.Lease, id clientv3.
 		select {
 		case _ = <-resCh:
 			// discard keepalive message
-			// g.Log().Infof(ctx, "etcd keepalive %v", resp)
+			// g.Log().Infof(ctx, "Etcd keepalive %v", resp)
 		case <-ctx.Done():
 			return
 		}
 	}
 }
 
-func (e *etcd) Delete(ctx context.Context, key string) (err error) {
+func (e *Etcd) Delete(ctx context.Context, key string) (err error) {
 	opts := make([]clientv3.OpOption, 0)
 	if strings.HasSuffix(key, "/") {
 		opts = append(opts, clientv3.WithPrefix())
@@ -108,14 +108,14 @@ func (e *etcd) Delete(ctx context.Context, key string) (err error) {
 	return
 }
 
-func (e *etcd) watch(ctx context.Context, key string, handler WatchHandler) {
+func (e *Etcd) watch(ctx context.Context, key string, handler WatchHandler) {
 	opts := make([]clientv3.OpOption, 0)
 	if strings.HasSuffix(key, "/") {
 		opts = append(opts, clientv3.WithPrefix())
 	}
-	g.Log().Infof(ctx, "etcd watching %s", key)
+	g.Log().Infof(ctx, "Etcd watching %s", key)
 	defer func() {
-		g.Log().Infof(ctx, "etcd stop watching %s", key)
+		g.Log().Infof(ctx, "Etcd stop watching %s", key)
 	}()
 	for {
 		select {
@@ -148,12 +148,12 @@ func (e *etcd) watch(ctx context.Context, key string, handler WatchHandler) {
 	}
 }
 
-func (e *etcd) Watch(ctx context.Context, key string, handler WatchHandler) (err error) {
+func (e *Etcd) Watch(ctx context.Context, key string, handler WatchHandler) (err error) {
 	go e.watch(ctx, key, handler)
 	return
 }
 
-func (e *etcd) Locker(ctx context.Context, topic string) (locker sync.Locker, err error) {
+func (e *Etcd) Locker(ctx context.Context, topic string) (locker sync.Locker, err error) {
 	resp, err := e.cli.Grant(ctx, 5)
 	if err != nil {
 		return

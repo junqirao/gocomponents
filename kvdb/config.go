@@ -11,7 +11,7 @@ type (
 		Endpoints []string `json:"endpoints"`
 		Username  string   `json:"username"`
 		Password  string   `json:"password"`
-		// etcd tls
+		// Etcd tls
 		Tls *TlsConfig `json:"tls"`
 	}
 	// StorageConfig for storage module

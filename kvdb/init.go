@@ -16,7 +16,7 @@ func Init(ctx context.Context) (err error) {
 			return
 		}
 
-		Raw, err = newEtcd(ctx, config)
+		Raw, err = NewEtcd(ctx, config)
 	})
 	return
 }

@@ -12,7 +12,7 @@ type Mutex struct {
 }
 
 func NewMutex(ctx context.Context, name string, database ...Database) (mu Mutex, err error) {
-	var db = Raw
+	var db Database
 	if len(database) > 0 {
 		db = database[0]
 	}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gctx"
 
 	"github.com/junqirao/gocomponents/kvdb"
 )
@@ -17,8 +18,15 @@ type KVDatabaseAdaptor struct {
 	db kvdb.Database // updater_record/{name}_{type}: Record
 }
 
-func NewKVDatabaseAdaptor(db kvdb.Database) (a RecordAdaptor) {
-	return &KVDatabaseAdaptor{db: db}
+func NewKVDatabaseAdaptor(db ...kvdb.Database) (a RecordAdaptor) {
+	var database kvdb.Database
+	if len(db) > 0 && db[0] != nil {
+		database = db[0]
+	}
+	if database == nil {
+		database = kvdb.MustGetDatabase(gctx.GetInitCtx())
+	}
+	return &KVDatabaseAdaptor{db: database}
 }
 
 func (k KVDatabaseAdaptor) Store(ctx context.Context, record *Record) (err error) {
