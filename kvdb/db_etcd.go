@@ -113,14 +113,15 @@ func (e *Etcd) watch(ctx context.Context, key string, handler WatchHandler) {
 	if strings.HasSuffix(key, "/") {
 		opts = append(opts, clientv3.WithPrefix())
 	}
-	g.Log().Infof(ctx, "Etcd watching %s", key)
+	g.Log().Infof(ctx, "etcd watching %s", key)
 	defer func() {
-		g.Log().Infof(ctx, "Etcd stop watching %s", key)
+		g.Log().Infof(ctx, "etcd stop watching %s", key)
 	}()
 	for {
 		select {
 		case resp := <-e.cli.Watch(ctx, key, opts...):
 			if resp.Canceled {
+				g.Log().Warningf(ctx, "watch canceled because of: %s", resp.Err())
 				return
 			}
 			for _, ev := range resp.Events {
@@ -143,6 +144,7 @@ func (e *Etcd) watch(ctx context.Context, key string, handler WatchHandler) {
 				})
 			}
 		case <-ctx.Done():
+			g.Log().Info(ctx, "etcd watch stop: context canceled")
 			return
 		}
 	}
