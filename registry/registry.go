@@ -41,8 +41,8 @@ type (
 		RegisterEventHandler(handler EventHandler)
 	}
 
-	// EventType of instance change
-	EventType string
+	// EventType of instance change, alias of kvdb.EventType
+	EventType = kvdb.EventType
 	// EventHandler of instance change
 	EventHandler func(i *Instance, e EventType)
 	// eventWrapper ...
@@ -256,7 +256,7 @@ func (r *registry) watchAndUpdateCache(ctx context.Context) {
 			}
 		}
 
-		r.pushEvent(instance, EventType(e.Type))
+		r.pushEvent(instance, e.Type)
 	})
 	if err != nil {
 		g.Log().Errorf(ctx, "registry failed to watchAndUpdateCache etcd: %v", err)
