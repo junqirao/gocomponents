@@ -17,6 +17,7 @@ var (
 	Registry Interface
 	// currentInstance created at Init
 	currentInstance *Instance
+	Empty           = new(Instance)
 	onceLoad        = sync.Once{}
 )
 
@@ -52,6 +53,15 @@ type (
 	}
 )
 
+// Current returns copy of current instance,
+// if not registered return Empty Instance
+func Current() *Instance {
+	if currentInstance == nil {
+		return Empty.Clone()
+	}
+	return currentInstance.Clone()
+}
+
 // Init registry module with config and sync services info from database and build local caches.
 // if *Instance is provided will be register automatically.
 // if context is done, watch loop will stop and local cache won't be updated anymore.
@@ -78,7 +88,7 @@ func InitWithConfig(ctx context.Context, config *Config, db kvdb.Database, ins .
 			instance = config.Instance
 		}
 		if instance != nil {
-			err = Registry.register(ctx, instance.clone().fillInfo())
+			err = Registry.register(ctx, instance.Clone().fillInfo())
 		}
 	})
 	return
@@ -252,7 +262,7 @@ func (r *registry) watchAndUpdateCache(ctx context.Context) {
 
 			// upsert currentInstance
 			if currentInstance != nil && instance.Id == currentInstance.Id {
-				currentInstance = instance.clone()
+				currentInstance = instance.Clone()
 			}
 		}
 
@@ -264,7 +274,7 @@ func (r *registry) watchAndUpdateCache(ctx context.Context) {
 }
 
 func (r *registry) pushEvent(instance *Instance, e EventType) {
-	ins := instance.clone()
+	ins := instance.Clone()
 	p := r.evs
 	for p != nil {
 		go p.handler(ins, e)

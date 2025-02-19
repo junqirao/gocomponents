@@ -74,7 +74,7 @@ func (i *Instance) registryIdentity(prefix ...string) string {
 	return fmt.Sprintf("%s%s", pfx, i.Identity())
 }
 
-func (i *Instance) clone() *Instance {
+func (i *Instance) Clone() *Instance {
 	meta := make(map[string]interface{})
 	if i.Meta != nil {
 		for k, v := range i.Meta {
@@ -170,7 +170,7 @@ func (s *Service) Instances() []*Instance {
 	defer s.mu.Unlock()
 	var ins []*Instance
 	for _, instance := range s.instances {
-		ins = append(ins, instance.clone())
+		ins = append(ins, instance.Clone())
 	}
 	return ins
 }
