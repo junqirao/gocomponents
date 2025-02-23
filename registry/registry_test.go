@@ -11,7 +11,7 @@ import (
 
 func getConfig() *Config {
 	return &Config{
-		Prefix: "/test-registry/",
+		Name: "test",
 	}
 }
 

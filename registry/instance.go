@@ -1,11 +1,15 @@
 package registry
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"sync"
 
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/google/uuid"
 )
 
@@ -67,7 +71,7 @@ func (i *Instance) String() string {
 }
 
 func (i *Instance) registryIdentity(prefix ...string) string {
-	pfx := defaultRegistryPrefix
+	pfx := ""
 	if len(prefix) > 0 && prefix[0] != "" {
 		pfx = prefix[0]
 	}
@@ -98,6 +102,14 @@ func (i *Instance) fillInfo() *Instance {
 	// try fetch host name if not exist
 	if i.HostName == "" {
 		i.HostName, _ = os.Hostname()
+	}
+	// try to get server.address
+	v, err := g.Cfg().Get(context.Background(), "server.address")
+	if err == nil {
+		parts := strings.Split(v.String(), ":")
+		if len(parts) > 0 {
+			i.Port = gconv.Int(parts[len(parts)-1])
+		}
 	}
 	// set defaultPort if out of range
 	if i.Port <= 0 || i.Port > 65535 {
