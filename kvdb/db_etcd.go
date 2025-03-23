@@ -90,9 +90,11 @@ func (e *Etcd) keepalive(ctx context.Context, lease clientv3.Lease, id clientv3.
 	}
 	for {
 		select {
-		case _ = <-resCh:
-			// discard keepalive message
-			// g.Log().Infof(ctx, "Etcd keepalive %v", resp)
+		case resp, ok := <-resCh:
+			if resp == nil || !ok {
+				g.Log().Warningf(ctx, "etcd keepalive lease %v closed: ok=%v,resp=%v", id, ok, resp)
+				return
+			}
 		case <-ctx.Done():
 			return
 		}
