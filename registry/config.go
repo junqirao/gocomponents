@@ -6,7 +6,7 @@ import (
 
 const (
 	defaultName              = "default"
-	defaultHeartBeatInterval = 3
+	defaultHeartBeatInterval = 10
 	defaultIdentitySeparator = "/"
 	defaultPort              = 8000
 )
@@ -16,7 +16,7 @@ type (
 	Config struct {
 		Instance          *Instance `json:"instance"`
 		Name              string    `json:"name"`
-		HeartBeatInterval int64     `json:"heart_beat_interval"` // default 3s
+		HeartBeatInterval int64     `json:"heart_beat_interval"` // default 10s
 	}
 )
 
