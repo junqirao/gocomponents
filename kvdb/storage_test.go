@@ -178,6 +178,12 @@ func TestEvent(t *testing.T) {
 }
 
 func TestStorage_SetTTL(t *testing.T) {
+	var (
+		key         = "xxx"
+		value       = "value"
+		storageName = "test_ttl"
+	)
+
 	err := Init(context.Background())
 	if err != nil {
 		t.Fatal(err)
@@ -189,24 +195,16 @@ func TestStorage_SetTTL(t *testing.T) {
 		return
 	}
 
-	sto := Storages.GetStorage("test_ttl")
-	err = sto.SetTTL(context.Background(), "test_ttl", "value", 10)
+	sto := Storages.GetStorage(storageName)
+	err = sto.SetTTL(context.Background(), key, value, 3)
 	if err != nil {
 		t.Fatal(err)
 		return
 	}
 
-	kvs, err := sto.Get(context.Background(), "test_ttl")
+	kvs, err := sto.Get(context.Background(), key)
 	if err != nil {
 		t.Fatal(err)
-		return
-	}
-	for _, kv := range kvs {
-		t.Logf("key=%v, value=%v", kv.Key, kv.Value.String())
-	}
-
-	if len(kvs) < 1 {
-		t.Fatal("get error, no value")
 		return
 	}
 
@@ -221,15 +219,15 @@ func TestStorage_SetTTL(t *testing.T) {
 		return has
 	}
 
-	if !checkHasValue(kvs, "value") {
+	if !checkHasValue(kvs, value) {
 		t.Fatal("value not match")
 		return
 	}
 
-	t.Log("wait 11 seconds for reach ttl")
-	time.Sleep(time.Second * 11)
+	t.Log("wait 5 seconds for reach ttl")
+	time.Sleep(time.Second * 5)
 
-	kvs, err = sto.Get(context.Background(), "test_ttl")
+	kvs, err = sto.Get(context.Background(), key)
 	if err != nil {
 		t.Fatal(err)
 		return
@@ -238,7 +236,7 @@ func TestStorage_SetTTL(t *testing.T) {
 		t.Logf("key=%v, value=%v", kv.Key, kv.Value.String())
 	}
 
-	if checkHasValue(kvs, "value") {
+	if checkHasValue(kvs, value) {
 		t.Fatal("ttl not work")
 		return
 	}

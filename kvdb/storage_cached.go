@@ -131,7 +131,8 @@ func (c *cachedStorage) Delete(ctx context.Context, key string) (err error) {
 }
 
 func (c *cachedStorage) remove(key string) {
-	pos := strings.Split(strings.TrimPrefix(key, c.db.buildStorageKey()), c.db.cfg.Separator)
+	key = strings.TrimPrefix(key, c.db.buildStorageKey())
+	pos := strings.Split(key, c.db.cfg.Separator)
 	node := c.root
 
 	for i := 0; i < len(pos)-1; i++ {
