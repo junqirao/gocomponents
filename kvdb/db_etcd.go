@@ -13,19 +13,28 @@ import (
 )
 
 type Etcd struct {
-	cli *clientv3.Client
+	createCli func(ctx context.Context) (*clientv3.Client, error)
+	cli       *clientv3.Client
 }
 
 func NewEtcd(ctx context.Context, cfg Config) (h *Etcd, err error) {
-	client, err := clientv3.New(clientv3.Config{
-		Endpoints:   cfg.Endpoints,
-		DialTimeout: time.Second * 10,
-		TLS:         cfg.tlsConfig(),
-		Username:    cfg.Username,
-		Password:    cfg.Password,
-		Context:     ctx,
-	})
-	h = &Etcd{cli: client}
+	h = &Etcd{
+		createCli: func(ctx context.Context) (*clientv3.Client, error) {
+			return clientv3.New(clientv3.Config{
+				Endpoints:   cfg.Endpoints,
+				DialTimeout: time.Second * 10,
+				TLS:         cfg.tlsConfig(),
+				Username:    cfg.Username,
+				Password:    cfg.Password,
+				Context:     ctx,
+			})
+		},
+	}
+	cli, err := h.createCli(ctx)
+	if err != nil {
+		return
+	}
+	h.cli = cli
 	return
 }
 
@@ -115,13 +124,23 @@ func (e *Etcd) watch(ctx context.Context, key string, handler WatchHandler) {
 	if strings.HasSuffix(key, "/") {
 		opts = append(opts, clientv3.WithPrefix())
 	}
+
+	cli, err := e.createCli(ctx)
+	if err != nil {
+		return
+	}
+
 	g.Log().Infof(ctx, "etcd watching %s", key)
 	defer func() {
+		// make sure release resources
+		_ = cli.Watcher.Close()
 		g.Log().Infof(ctx, "etcd stop watching %s", key)
 	}()
+	watchChan := cli.Watcher.Watch(ctx, key, opts...)
+
 	for {
 		select {
-		case resp := <-e.cli.Watch(ctx, key, opts...):
+		case resp := <-watchChan:
 			if resp.Canceled {
 				g.Log().Warningf(ctx, "watch canceled because of: %s", resp.Err())
 				return
