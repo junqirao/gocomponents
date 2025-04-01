@@ -35,12 +35,12 @@ func handleMessage(ctx context.Context, pfx string, e kvdb.Event) {
 			g.Log().Warningf(ctx, "invalid message: %s", err.Error())
 			return
 		}
-		// start
-		err := handler.Handle(ctx, msg)
-		if err != nil {
+		if msg.HasAck {
 			// drop
 			return
 		}
+		// handle
+		handler.Handle(ctx, msg)
 	case kvdb.EventTypeUpdate:
 		// extra
 		_, ok = messageCache.Load(id)
@@ -56,7 +56,7 @@ func handleMessage(ctx context.Context, pfx string, e kvdb.Event) {
 		messageCache.Store(id, msg)
 	case kvdb.EventTypeDelete:
 		// finish ack
-		mv, ok := messageCache.LoadAndDelete(id)
+		mv, ok := messageCache.Load(id)
 		if !ok {
 			// drop
 			return

@@ -24,7 +24,7 @@ func Init(ctx context.Context) (err error) {
 
 type (
 	MessageHandler interface {
-		Handle(ctx context.Context, msg *Message) (err error)
+		Handle(ctx context.Context, msg *Message)
 		After(ctx context.Context, msg *Message)
 	}
 )

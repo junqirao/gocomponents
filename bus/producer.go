@@ -34,7 +34,10 @@ func (m Message) Ack(ctx context.Context, err ...error) {
 	}
 	if len(err) > 0 && err[0] != nil {
 		m.Err = err[0].Error()
+		m.HasAck = true
 		_ = kvdb.Raw.Set(ctx, buildTopicKey(m.Topic, m.Id), gconv.String(m), 10)
+		// sleep 500ms in case of network error
+		time.Sleep(time.Millisecond * 500)
 	}
 	_ = kvdb.Raw.Delete(ctx, buildTopicKey(m.Topic, m.Id))
 }
@@ -95,6 +98,11 @@ func Push(ctx context.Context, topic string, payload any, ttl int64, wait ...boo
 		err = errors.New("push ack timeout")
 	case <-sig:
 		// finished
+		value, loaded := messageCache.LoadAndDelete(id)
+		if loaded {
+			msg = value.(*Message)
+			err = msg.Error()
+		}
 	}
 	return
 }

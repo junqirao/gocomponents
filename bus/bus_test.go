@@ -9,13 +9,17 @@ import (
 	"github.com/junqirao/gocomponents/kvdb"
 )
 
+var (
+	testErr = fmt.Errorf("test error")
+)
+
 type testHandler struct {
 }
 
-func (t testHandler) Handle(ctx context.Context, msg *Message) error {
+func (t testHandler) Handle(ctx context.Context, msg *Message) {
 	fmt.Printf("receive message: %+v\n", msg)
 	msg.Ack(ctx)
-	return nil
+	return
 }
 
 func (t testHandler) After(ctx context.Context, msg *Message) {
@@ -25,10 +29,10 @@ func (t testHandler) After(ctx context.Context, msg *Message) {
 type testErrorAckHandler struct {
 }
 
-func (t testErrorAckHandler) Handle(ctx context.Context, msg *Message) error {
+func (t testErrorAckHandler) Handle(ctx context.Context, msg *Message) {
 	fmt.Printf("receive message: %+v\n", msg)
-	msg.Ack(ctx, fmt.Errorf("test error"))
-	return nil
+	msg.Ack(ctx, testErr)
+	return
 }
 
 func (t testErrorAckHandler) After(ctx context.Context, msg *Message) {
@@ -56,13 +60,15 @@ func TestBus(t *testing.T) {
 		t.Fatal(err)
 		return
 	}
-
-	fmt.Println("-------")
-
+	time.Sleep(time.Second)
+	fmt.Println("---------------")
 	RegisterHandler(context.Background(), "test_error_ack", testErrorAckHandler{})
 	err = Push(context.Background(), "test_error_ack", "test", 3, true)
 	if err != nil {
-		t.Fatal(err)
-		return
+		if err.Error() != testErr.Error() {
+			t.Fatalf("expected error: %v, got: %v", testErr, err)
+		}
+	} else {
+		t.Fatalf("expected error: %v, got: %v", testErr, err)
 	}
 }
