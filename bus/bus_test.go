@@ -12,12 +12,13 @@ import (
 type testHandler struct {
 }
 
-func (t testHandler) Receive(ctx context.Context, msg *Message) error {
+func (t testHandler) Handle(ctx context.Context, msg *Message) error {
 	fmt.Printf("receive message: %+v\n", msg)
+	msg.Ack(ctx)
 	return nil
 }
 
-func (t testHandler) Finish(ctx context.Context, msg *Message) {
+func (t testHandler) After(ctx context.Context, msg *Message) {
 	fmt.Printf("finish message: %+v\n", msg)
 }
 

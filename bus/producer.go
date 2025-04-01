@@ -24,9 +24,13 @@ type Message struct {
 	Payload   any    `json:"payload"`
 	From      string `json:"from"`
 	ExpiredAt int64  `json:"expired_at"`
+	HasAck    bool   `json:"has_ack"`
 }
 
 func (m Message) Ack(ctx context.Context) {
+	if m.HasAck {
+		return
+	}
 	_ = kvdb.Raw.Delete(ctx, buildTopicKey(m.Topic, m.Id))
 }
 
