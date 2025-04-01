@@ -41,6 +41,19 @@ func handleMessage(ctx context.Context, pfx string, e kvdb.Event) {
 			// drop
 			return
 		}
+	case kvdb.EventTypeUpdate:
+		// extra
+		_, ok = messageCache.Load(id)
+		if !ok {
+			return
+		}
+		msg := &Message{}
+		if err := e.Value.Struct(msg); err != nil {
+			// drop
+			g.Log().Warningf(ctx, "invalid message: %s", err.Error())
+			return
+		}
+		messageCache.Store(id, msg)
 	case kvdb.EventTypeDelete:
 		// finish ack
 		mv, ok := messageCache.LoadAndDelete(id)
