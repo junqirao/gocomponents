@@ -1,4 +1,4 @@
-package bus
+package kvdb
 
 import (
 	"context"
@@ -10,48 +10,8 @@ import (
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
 
-	"github.com/junqirao/gocomponents/kvdb"
-	"github.com/junqirao/gocomponents/registry"
+	"github.com/junqirao/gocomponents/meta"
 )
-
-const (
-	busName = "/message-bus"
-)
-
-type Message struct {
-	Id        string `json:"id"`
-	Topic     string `json:"topic"`
-	Payload   any    `json:"payload"`
-	From      string `json:"from"`
-	ExpiredAt int64  `json:"expired_at"`
-	HasAck    bool   `json:"has_ack"`
-	Err       string `json:"err"`
-}
-
-func (m Message) Ack(ctx context.Context, err ...error) {
-	if m.HasAck {
-		return
-	}
-	if len(err) > 0 && err[0] != nil {
-		m.Err = err[0].Error()
-		m.HasAck = true
-		_ = kvdb.Raw.Set(ctx, buildTopicKey(m.Topic, m.Id), gconv.String(m), 10)
-		// sleep 500ms in case of network error
-		time.Sleep(time.Millisecond * 500)
-	}
-	_ = kvdb.Raw.Delete(ctx, buildTopicKey(m.Topic, m.Id))
-}
-
-func (m Message) Error() error {
-	if m.Err == "" {
-		return nil
-	}
-	return errors.New(m.Err)
-}
-
-func buildTopicKey(topic, id string) string {
-	return fmt.Sprintf("%s/%s/%s", busName, topic, id)
-}
 
 func Push(ctx context.Context, topic string, payload any, ttl int64, wait ...bool) (err error) {
 	// check
@@ -66,10 +26,10 @@ func Push(ctx context.Context, topic string, payload any, ttl int64, wait ...boo
 		Id:        id,
 		Topic:     topic,
 		Payload:   payload,
-		From:      registry.Current().Id,
+		From:      meta.InstanceId(),
 		ExpiredAt: time.Now().Unix() + ttl,
 	}
-	err = kvdb.Raw.Set(ctx, buildTopicKey(topic, id), gconv.String(msg), ttl)
+	err = Raw.Set(ctx, buildTopicKey(topic, id), gconv.String(msg), ttl)
 	if err != nil {
 		return
 	}

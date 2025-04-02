@@ -1,12 +1,10 @@
-package bus
+package kvdb
 
 import (
 	"context"
 	"fmt"
 	"testing"
 	"time"
-
-	"github.com/junqirao/gocomponents/kvdb"
 )
 
 var (
@@ -40,13 +38,13 @@ func (t testErrorAckHandler) After(ctx context.Context, msg *Message) {
 }
 
 func TestBus(t *testing.T) {
-	err := kvdb.Init(context.Background())
+	err := Init(context.Background())
 	if err != nil {
 		t.Fatal(err)
 		return
 	}
 
-	err = Init(context.Background())
+	err = InitBus(context.Background())
 	if err != nil {
 		t.Fatal(err)
 		return
