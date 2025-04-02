@@ -13,7 +13,7 @@ import (
 	"github.com/junqirao/gocomponents/meta"
 )
 
-func Push(ctx context.Context, topic string, payload any, ttl int64, wait ...bool) (err error) {
+func PushMessage(ctx context.Context, topic string, payload any, ttl int64, wait ...bool) (err error) {
 	// check
 	_, ok := handlers.Load(topic)
 	if !ok {
