@@ -84,7 +84,7 @@ func (e *Etcd) Set(ctx context.Context, key string, value interface{}, ttl int64
 			return
 		}
 		if len(keepalive) > 0 && keepalive[0] {
-			go e.keepalive(ctx, lease, grant.ID)
+			go e.keepalive(ctx, lease, grant.ID, ttl)
 		}
 		opts = append(opts, clientv3.WithLease(grant.ID))
 	}
@@ -92,18 +92,27 @@ func (e *Etcd) Set(ctx context.Context, key string, value interface{}, ttl int64
 	return
 }
 
-func (e *Etcd) keepalive(ctx context.Context, lease clientv3.Lease, id clientv3.LeaseID) {
+func (e *Etcd) keepalive(ctx context.Context, lease clientv3.Lease, id clientv3.LeaseID, ttl int64) {
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 	resCh, err := lease.KeepAlive(ctx, id)
 	if err != nil {
+		g.Log().Errorf(ctx, "etcd keepalive lease %v failed: %v", id, err)
 		return
 	}
 	for {
 		select {
 		case resp, ok := <-resCh:
-			if resp == nil || !ok {
-				g.Log().Warningf(ctx, "etcd keepalive lease %v closed: ok=%v,resp=%v", id, ok, resp)
+			if !ok {
+				g.Log().Warningf(ctx, "etcd keepalive lease %v channel closed", id)
 				return
 			}
+			if resp == nil {
+				g.Log().Warningf(ctx, "etcd keepalive lease %v closed", id)
+				return
+			}
+			// sleep 100ms to avoid loop too fast
+			time.Sleep(time.Millisecond * 100)
 		case <-ctx.Done():
 			return
 		}
