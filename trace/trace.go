@@ -30,3 +30,15 @@ func Middleware(r *ghttp.Request) {
 func GetTraceId(ctx context.Context) string {
 	return gconv.String(ctx.Value(ctxKeyTraceId))
 }
+
+// CopyTraceInfo from context
+func CopyTraceInfo(src context.Context, dst ...context.Context) (ctx context.Context) {
+	var newCtx context.Context
+	if len(dst) > 0 && dst[0] != nil {
+		newCtx = dst[0]
+	} else {
+		newCtx = context.Background()
+	}
+	ctx = context.WithValue(newCtx, ctxKeyTraceId, GetTraceId(src))
+	return
+}
