@@ -53,7 +53,7 @@ func (m Message) Ack(ctx context.Context, err ...error) {
 		m.Err = err[0].Error()
 		m.HasAck = true
 		// deleted at event
-		_ = Raw.Set(ctx, buildTopicKey(m.Topic, m.Id), gconv.String(m), 10)
+		_ = Raw.Set(ctx, buildTopicKey(m.Topic, m.Id), gconv.String(m), WithTTL(10))
 	} else {
 		_ = Raw.Delete(ctx, buildTopicKey(m.Topic, m.Id))
 	}

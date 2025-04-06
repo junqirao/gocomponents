@@ -30,7 +30,7 @@ func NewKVDatabaseAdaptor(db ...kvdb.Database) (a RecordAdaptor) {
 }
 
 func (k KVDatabaseAdaptor) Store(ctx context.Context, record *Record) (err error) {
-	return k.db.Set(ctx, k.getKey(record), record, 0)
+	return k.db.Set(ctx, k.getKey(record), record)
 }
 
 func (k KVDatabaseAdaptor) Load(ctx context.Context, params *RecordQueryParams) (res *RecordQueryResult, err error) {

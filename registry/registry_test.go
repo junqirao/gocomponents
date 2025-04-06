@@ -45,6 +45,24 @@ func TestInit(t *testing.T) {
 	time.Sleep(time.Second * 60)
 }
 
+func TestReRegister(t *testing.T) {
+	err := InitWithConfig(context.Background(), getConfig(), kvdb.MustGetDatabase(context.Background()),
+		NewInstance("test-service").
+			WithAddress("127.0.0.1", 8080).
+			WithMetaData(map[string]interface{}{"key": "value"}))
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	go func() {
+		for {
+			time.Sleep(time.Second)
+			t.Logf("currentInstance==nil: %v", currentInstance == nil)
+		}
+	}()
+	time.Sleep(time.Hour)
+}
+
 func TestRegistry(t *testing.T) {
 	err := InitWithConfig(context.Background(), getConfig(), kvdb.MustGetDatabase(context.Background()),
 		NewInstance("test-service").

@@ -29,7 +29,7 @@ func PushMessage(ctx context.Context, topic string, payload any, ttl int64, wait
 		From:      meta.InstanceId(),
 		ExpiredAt: time.Now().Unix() + ttl,
 	}
-	err = Raw.Set(ctx, buildTopicKey(topic, id), gconv.String(msg), ttl)
+	err = Raw.Set(ctx, buildTopicKey(topic, id), gconv.String(msg), WithTTL(ttl))
 	if err != nil {
 		return
 	}

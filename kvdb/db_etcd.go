@@ -10,6 +10,8 @@ import (
 	"github.com/gogf/gf/v2/util/gconv"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.etcd.io/etcd/client/v3/concurrency"
+
+	"github.com/junqirao/gocomponents/trace"
 )
 
 type Etcd struct {
@@ -72,37 +74,61 @@ func (e *Etcd) GetPrefix(ctx context.Context, key string) (v []*KV, err error) {
 	return
 }
 
-func (e *Etcd) Set(ctx context.Context, key string, value interface{}, ttl int64, keepalive ...bool) (err error) {
+func (e *Etcd) Set(ctx context.Context, key string, value interface{}, ops ...SetOption) (err error) {
+	cfg := &setConfig{}
+	for _, op := range ops {
+		op(cfg)
+	}
 	opts := make([]clientv3.OpOption, 0)
 	if strings.HasSuffix(key, "/") {
 		opts = append(opts, clientv3.WithPrefix())
 	}
-	if ttl > 0 {
+	if cfg.ttl > 0 {
 		lease := clientv3.NewLease(e.cli)
 		var grant *clientv3.LeaseGrantResponse
-		if grant, err = lease.Grant(ctx, ttl); err != nil {
+		if grant, err = lease.Grant(ctx, cfg.ttl); err != nil {
 			return
 		}
-		if len(keepalive) > 0 && keepalive[0] {
-			go e.keepalive(ctx, lease, grant.ID, ttl)
-		}
+		defer func() {
+			if err != nil {
+				_ = lease.Close()
+				return
+			}
+			// keepalive only when put success
+			if cfg.keepalive {
+				go e.keepalive(ctx, lease, grant.ID, cfg)
+			}
+		}()
 		opts = append(opts, clientv3.WithLease(grant.ID))
 	}
 	_, err = e.cli.Put(ctx, key, gconv.String(value), opts...)
 	return
 }
 
-func (e *Etcd) keepalive(ctx context.Context, lease clientv3.Lease, id clientv3.LeaseID, ttl int64) {
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
-	resCh, err := lease.KeepAlive(ctx, id)
+func (e *Etcd) keepalive(ctx context.Context, lease clientv3.Lease, id clientv3.LeaseID, cfg *setConfig) {
+	var (
+		cancel context.CancelFunc
+		err    error
+		ch     <-chan *clientv3.LeaseKeepAliveResponse
+	)
+	// make new context
+	ctx, cancel = context.WithCancel(trace.CopyTraceInfo(ctx))
+
+	defer func() {
+		cancel()
+		if cfg.onKeepaliveStopped != nil {
+			cfg.onKeepaliveStopped(err)
+		}
+	}()
+
+	ch, err = lease.KeepAlive(ctx, id)
 	if err != nil {
 		g.Log().Errorf(ctx, "etcd keepalive lease %v failed: %v", id, err)
 		return
 	}
 	for {
 		select {
-		case resp, ok := <-resCh:
+		case resp, ok := <-ch:
 			if !ok {
 				g.Log().Warningf(ctx, "etcd keepalive lease %v channel closed", id)
 				return
@@ -111,6 +137,7 @@ func (e *Etcd) keepalive(ctx context.Context, lease clientv3.Lease, id clientv3.
 				g.Log().Warningf(ctx, "etcd keepalive lease %v closed", id)
 				return
 			}
+			// g.Log().Debugf(ctx, "etcd keepalive lease %v", id)
 			// sleep 100ms to avoid loop too fast
 			time.Sleep(time.Millisecond * 100)
 		case <-ctx.Done():

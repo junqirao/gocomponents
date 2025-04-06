@@ -5,9 +5,11 @@ import (
 	"errors"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 
+	"github.com/junqirao/gocomponents/grace"
 	"github.com/junqirao/gocomponents/kvdb"
 )
 
@@ -95,10 +97,11 @@ func InitWithConfig(ctx context.Context, config *Config, db kvdb.Database, ins .
 }
 
 type registry struct {
-	cli   kvdb.Database
-	cfg   *Config
-	cache sync.Map // service_name : *Service
-	evs   *eventWrapper
+	cli             kvdb.Database
+	cfg             *Config
+	cache           sync.Map // service_name : *Service
+	evs             *eventWrapper
+	reRegisterCount int
 }
 
 func newRegistry(ctx context.Context, cfg Config, db kvdb.Database) (r Interface, err error) {
@@ -124,10 +127,14 @@ func (r *registry) register(ctx context.Context, ins *Instance) (err error) {
 	if err != nil {
 		return
 	} else {
-		// check if already registered
+		// check if already registered in another machine
 		for _, instance := range service.instances {
 			if instance.Identity() == currentInstance.Identity() {
-				return ErrAlreadyRegistered
+				if instance.Host != currentInstance.Host ||
+					instance.Port != currentInstance.Port ||
+					instance.HostName != currentInstance.HostName {
+					return ErrAlreadyRegistered
+				}
 			}
 		}
 	}
@@ -137,14 +144,65 @@ func (r *registry) register(ctx context.Context, ins *Instance) (err error) {
 	if err = r.cli.Set(context.Background(),
 		currentInstance.registryIdentity(r.cfg.getRegistryPrefix()),
 		currentInstance.String(),
-		r.cfg.HeartBeatInterval, true); err != nil {
+		kvdb.WithTTL(r.cfg.HeartBeatInterval),
+		kvdb.WithKeepAlive(),
+		kvdb.WithKeepAliveStoppedHandler(func(err error) {
+			// keep alive stopped
+			g.Log().Errorf(ctx, "registry heartbeat stopped: err=%v", err)
+			// re-register
+			r.reRegister(ctx, ins)
+		}),
+	); err != nil {
 		return
 	}
 	g.Log().Infof(ctx, "registry success: %s", currentInstance.String())
-
+	// reset counter
+	r.reRegisterCount = 0
 	// rebuild local cache
 	r.buildCache(ctx)
 	return
+}
+
+func (r *registry) reRegister(ctx context.Context, ins *Instance) {
+	if r.reRegisterCount >= r.cfg.MaximumRetry {
+		g.Log().Errorf(ctx, "registry re-register count exceed maximum: %d", r.cfg.MaximumRetry)
+		// grace exit
+		grace.ExecAndExit(ctx)
+		return
+	}
+	g.Log().Infof(ctx, "registry try re-register, count=%d", r.reRegisterCount)
+	r.reRegisterCount++
+	// clear all resources
+	currentInstance = nil
+	// backoff and re-register
+	backoff := r.fibWithLimit(r.reRegisterCount, 3, 30)
+	g.Log().Infof(ctx, "registry re-register in %d seconds, count=%d", backoff, r.reRegisterCount)
+	time.Sleep(time.Second * time.Duration(backoff))
+	err := r.register(ctx, ins)
+	if err != nil {
+		g.Log().Errorf(ctx, "registry re-register failed: %v", err)
+		r.reRegister(ctx, ins)
+		return
+	}
+}
+
+func (r *registry) fibWithLimit(n, min, max int) int {
+	var fib func(n int) int
+	fib = func(n int) int {
+		if n <= 1 {
+			return n
+		}
+		return fib(n-1) + fib(n-2)
+	}
+
+	val := fib(n)
+	if val > max {
+		val = max
+	}
+	if val < min {
+		val = min
+	}
+	return val
 }
 
 func (r *registry) Deregister(ctx context.Context) (err error) {
@@ -233,7 +291,8 @@ func (r *registry) watchAndUpdateCache(ctx context.Context) {
 					service = value.(*Service)
 				)
 
-				instance = service.remove(strings.TrimPrefix(e.Key, pfx))
+				instanceId := strings.TrimPrefix(e.Key, pfx)
+				instance = service.remove(instanceId)
 				deleted = instance != nil
 
 				// remove empty service

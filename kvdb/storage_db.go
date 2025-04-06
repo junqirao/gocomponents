@@ -40,7 +40,14 @@ func (s *storage) set(ctx context.Context, key string, value interface{}, ttl in
 	if !strings.HasPrefix(key, s.name) {
 		key = s.buildStorageKey(key)
 	}
-	return s.Database.Set(ctx, key, value, ttl, keepalive...)
+	opts := make([]SetOption, 0)
+	if ttl > 0 {
+		opts = append(opts, WithTTL(ttl))
+	}
+	if len(keepalive) > 0 && keepalive[0] {
+		opts = append(opts, WithKeepAlive())
+	}
+	return s.Database.Set(ctx, key, value, opts...)
 }
 
 func (s *storage) Delete(ctx context.Context, key string) (err error) {

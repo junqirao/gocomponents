@@ -33,7 +33,7 @@ type (
 		// GetPrefix values from database by prefixed key
 		GetPrefix(ctx context.Context, key string) (v []*KV, err error)
 		// Set value to database
-		Set(ctx context.Context, key string, value interface{}, ttl int64, keepalive ...bool) (err error)
+		Set(ctx context.Context, key string, value interface{}, opts ...SetOption) (err error)
 		// Delete value from database
 		Delete(ctx context.Context, key string) (err error)
 		// Watch database changes
@@ -43,6 +43,33 @@ type (
 	}
 	// EventType of instance change
 	EventType string
+
+	// SetOption set handler
+	SetOption func(cfg *setConfig)
+	// keepAliveHandler
+	setConfig struct {
+		keepalive          bool
+		ttl                int64
+		onKeepaliveStopped func(err error)
+	}
+)
+
+var (
+	WithKeepAlive = func() SetOption {
+		return func(cfg *setConfig) {
+			cfg.keepalive = true
+		}
+	}
+	WithTTL = func(ttlSeconds int64) SetOption {
+		return func(cfg *setConfig) {
+			cfg.ttl = ttlSeconds
+		}
+	}
+	WithKeepAliveStoppedHandler = func(f func(err error)) SetOption {
+		return func(cfg *setConfig) {
+			cfg.onKeepaliveStopped = f
+		}
+	}
 )
 
 // event type define
