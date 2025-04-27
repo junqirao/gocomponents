@@ -287,7 +287,7 @@ func (r *registry) watchAndUpdateCache(ctx context.Context) {
 			// find and delete instance by e.key=instance.Identity()
 			r.cache.Range(func(key, value interface{}) bool {
 				var (
-					deleted = false
+					deleted bool
 					service = value.(*Service)
 				)
 
