@@ -1,5 +1,7 @@
 # go-components
 
+https://img.shields.io/badge/go%20report-A+-brightgreen.svg?style=flat
+
 golang components
 
 ## list
