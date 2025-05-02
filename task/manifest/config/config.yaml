@@ -1,0 +1,5 @@
+kvdb:
+  database:
+    endpoints:
+      - 172.18.28.240:2382
+  storage:
