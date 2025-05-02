@@ -1,6 +1,6 @@
 # go-components
 
-https://img.shields.io/badge/go%20report-A+-brightgreen.svg?style=flat
+[![go repo](https://img.shields.io/badge/go%20report-A+-brightgreen.svg?style=flat)](https://goreportcard.com/report/github.com/junqirao/gocomponents)
 
 golang components
 
