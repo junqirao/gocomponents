@@ -264,7 +264,10 @@ func (c *createdTask) Next(ctx context.Context, eventType kvdb.EventType) {
 		}
 		c.FinishedAt = time.Now().UnixMilli()
 	}
-	err = sto.Set(ctx, id, c)
+
+	if err = sto.Set(ctx, id, c); err != nil {
+		g.Log().Warningf(ctx, "update task failed: %v", err.Error())
+	}
 }
 
 func (c *handledTask) Next(ctx context.Context, eventType kvdb.EventType) {
