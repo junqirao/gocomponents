@@ -113,7 +113,7 @@ func Create(ctx context.Context, typ string, opts ...CreateOption) (t *Task, err
 	if t.Unique && t.Id != "" {
 		var kvs []*kvdb.KV
 		kvs, err = sto.Get(ctx, buildId(t.Type, t.Id))
-		if err != nil {
+		if err != nil && !errors.Is(err, kvdb.ErrStorageNotFound) {
 			return
 		}
 		if len(kvs) > 0 {
